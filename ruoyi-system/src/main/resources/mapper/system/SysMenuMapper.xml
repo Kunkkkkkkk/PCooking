@@ -198,9 +198,9 @@
 		sysdate()
 		)
 	</insert>
-	
-	<delete id="deleteMenuById" parameterType="Long">
-	    delete from sys_menu where menu_id = #{menuId}
-	</delete>
+
+	<update id="deleteMenuById" parameterType="map">
+		update sys_menu set status = #{arg1} where menu_id = #{arg0}
+	</update>
 
 </mapper> 

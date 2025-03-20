@@ -323,9 +323,9 @@ public class SysMenuServiceImpl implements ISysMenuService
      * @return 结果
      */
     @Override
-    public int deleteMenuById(Long menuId)
+    public int deleteMenuById(Long menuId,char deleteFlg)
     {
-        return menuMapper.deleteMenuById(menuId);
+        return menuMapper.deleteMenuById(menuId,deleteFlg);
     }
 
     /**

@@ -48,7 +48,12 @@ public class SysDictDataController extends BaseController
         List<SysDictData> list = dictDataService.selectDictDataList(dictData);
         return getDataTable(list);
     }
-
+    @GetMapping("/listNoPage")
+    public AjaxResult listNoPage(Long dictCode){
+        SysDictData dictData = new SysDictData();
+        dictData.setDictCode(dictCode);
+        return AjaxResult.success(dictDataService.selectDictDataList(dictData));
+    }
     @Log(title = "字典数据", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:dict:export')")
     @PostMapping("/export")
@@ -66,6 +71,7 @@ public class SysDictDataController extends BaseController
     @GetMapping(value = "/{dictCode}")
     public AjaxResult getInfo(@PathVariable Long dictCode)
     {
+        Object data =dictDataService.selectDictDataById(dictCode);
         return success(dictDataService.selectDictDataById(dictCode));
     }
 

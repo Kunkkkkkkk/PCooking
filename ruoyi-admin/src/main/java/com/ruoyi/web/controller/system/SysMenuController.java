@@ -4,14 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.controller.BaseController;
@@ -124,19 +117,19 @@ public class SysMenuController extends BaseController
     /**
      * 删除菜单
      */
-    @PreAuthorize("@ss.hasPermi('system:menu:remove')")
-    @Log(title = "菜单管理", businessType = BusinessType.DELETE)
+    @PreAuthorize("@ss.hasPermi('system:menu:en/disable')")
+    @Log(title = "菜单管理", businessType = BusinessType.UPDATE)
     @DeleteMapping("/{menuId}")
-    public AjaxResult remove(@PathVariable("menuId") Long menuId)
+    public AjaxResult remove(@PathVariable("menuId") Long menuId, @RequestParam char deleteFlg)
     {
-        if (menuService.hasChildByMenuId(menuId))
+        if (menuService.hasChildByMenuId(menuId)&&deleteFlg=='1')
         {
-            return warn("存在子菜单,不允许删除");
+            return warn("存在子菜单,不允许禁用");
         }
-        if (menuService.checkMenuExistRole(menuId))
-        {
-            return warn("菜单已分配,不允许删除");
-        }
-        return toAjax(menuService.deleteMenuById(menuId));
+//        if (menuService.checkMenuExistRole(menuId))
+//        {
+//            return warn("菜单已分配,不允许禁用");
+//        }
+        return toAjax(menuService.deleteMenuById(menuId,deleteFlg));
     }
 }

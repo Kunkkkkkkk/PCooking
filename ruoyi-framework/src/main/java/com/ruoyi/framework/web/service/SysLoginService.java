@@ -110,6 +110,8 @@ public class SysLoginService
      */
     public void validateCaptcha(String username, String code, String uuid)
     {
+        //如果uuid也为空，说明pda用户，直接跳过就行
+       if(uuid!=null){
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         if (captchaEnabled)
         {
@@ -126,7 +128,7 @@ public class SysLoginService
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
                 throw new CaptchaException();
             }
-        }
+        }}
     }
 
     /**

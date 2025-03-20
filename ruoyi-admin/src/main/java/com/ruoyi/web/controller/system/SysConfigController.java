@@ -33,7 +33,7 @@ public class SysConfigController extends BaseController
 {
     @Autowired
     private ISysConfigService configService;
-
+//TODO 前端默认admin和密码
     /**
      * 获取参数配置列表
      */

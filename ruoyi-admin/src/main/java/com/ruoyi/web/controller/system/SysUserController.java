@@ -2,7 +2,9 @@ package com.ruoyi.web.controller.system;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -60,6 +63,7 @@ public class SysUserController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(SysUser user)
     {
+        //TODO 这里要把角色也查询进去
         startPage();
         List<SysUser> list = userService.selectUserList(user);
         return getDataTable(list);
@@ -124,6 +128,7 @@ public class SysUserController extends BaseController
     @PostMapping
     public AjaxResult add(@Validated @RequestBody SysUser user)
     {
+        //TODO 新增的时候没有插入头像，前端有一个默认的显示
         deptService.checkDeptDataScope(user.getDeptId());
         roleService.checkRoleDataScope(user.getRoleIds());
         if (!userService.checkUserNameUnique(user))
@@ -180,7 +185,7 @@ public class SysUserController extends BaseController
     public AjaxResult remove(@PathVariable Long[] userIds)
     {
         if (ArrayUtils.contains(userIds, getUserId()))
-        {
+        {   //不能删除当前登入的账号
             return error("当前用户不能删除");
         }
         return toAjax(userService.deleteUserByIds(userIds));
@@ -253,4 +258,18 @@ public class SysUserController extends BaseController
     {
         return success(deptService.selectDeptTreeList(dept));
     }
+
+    /**
+     * 保存消息
+     */
+    @Log(title = "消息管理", businessType = BusinessType.INSERT)
+    @PostMapping("/saveMessage")
+    public AjaxResult saveMessage(@RequestBody String message)
+    {
+        String message1 = "消息";
+        return toAjax(deptService.insertMessage(message));
+    }
+
+    
 }
+

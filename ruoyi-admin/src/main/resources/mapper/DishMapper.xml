@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.DishMapper">
+    <select id="getAll" resultType="com.ruoyi.pda.domain.Dishes"> SELECT d.dish_id as dishId,
+        d.name, d.price, d.status, d.image,sd.dict_code AS typeDictCode,sd.dict_label AS typeName
+        FROM master_dishes d LEFT JOIN sys_dict_data sd ON d.type_dict_code = sd.dict_code <where>
+            <if test="status != null"> AND d.status = #{status} </if>
+            <if
+                test="typeDictCode != null and typeDictCode != 0"> AND d.type_dict_code =
+        #{typeDictCode} </if>
+            <if
+                test="name != null and name != ''"> AND d.name LIKE CONCAT('%', #{name}, '%') </if>
+        </where>
+    </select>
+
+    <select id="getMaterial" resultType="com.ruoyi.pda.domain.DishMaterial"> SELECT
+        mdi.quantity,mdi.unit,mdi.is_required as isRequired,mdi.extra_price as extraPrice,
+        mi.ingredient_name AS name, mi.ingredient_id as ingredientId FROM master_dish_ingredients
+        mdi LEFT JOIN master_ingredients mi ON mdi.ingredient_id = mi.ingredient_id WHERE
+        mdi.dish_id = #{id} </select>
+
+
+    <!-- deleteDish -->
+
+    <delete id="deleteDish"> DELETE FROM master_dishes WHERE dish_id = #{dishId} </delete>
+
+
+    <!-- deleteMaterial -->
+
+    <delete id="deleteMaterial"> DELETE FROM master_dish_ingredients WHERE dish_id = #{dishId} </delete>
+
+
+    <!-- insertDish -->
+
+    <insert id="insertDish" useGeneratedKeys="true" keyProperty="dishId"> Insert into master_dishes
+        (name,type_dict_code,status,price) values (#{name},#{typeDictCode},#{status},#{price}) </insert>
+
+    <!-- insertMaterial -->
+
+    <insert id="insertMaterial" parameterType="map" useGeneratedKeys="true"
+        keyProperty="dishMaterials.id"> INSERT INTO master_dish_ingredients (dish_id, ingredient_id,
+        quantity, unit, is_required, extra_price) VALUES <foreach collection="dishMaterials"
+            item="material" separator=","> (#{dishId}, #{material.ingredientId},
+        #{material.quantity}, #{material.unit}, #{material.isRequired}, #{material.extraPrice}) </foreach>
+    </insert>
+
+    <!-- updateDish -->
+
+    <update id="updateDish"> UPDATE master_dishes SET name = #{name}, type_dict_code =
+        #{typeDictCode}, status = #{status}, price = #{price} ,image = #{image} WHERE dish_id =
+        #{dishId} </update>
+
+    <!-- getIngredientsList-->
+    <select id="getIngredientsList" resultType="com.ruoyi.pda.domain.Ingredient"> SELECT
+        ingredient_name as name ,ingredient_id as ingredientId from master_ingredients <where>
+            <if test="name !=null and name !=''">ingredient_name like CONCAT('%', #{name}, '%')</if>
+        </where>
+    </select>
+</mapper>

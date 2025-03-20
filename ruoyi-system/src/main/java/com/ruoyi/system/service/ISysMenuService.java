@@ -127,12 +127,12 @@ public interface ISysMenuService
     public int updateMenu(SysMenu menu);
 
     /**
-     * 删除菜单管理信息
+     * 菜单启用禁用
      * 
      * @param menuId 菜单ID
      * @return 结果
      */
-    public int deleteMenuById(Long menuId);
+    public int deleteMenuById(Long menuId,char deleteFlg);
 
     /**
      * 校验菜单名称是否唯一

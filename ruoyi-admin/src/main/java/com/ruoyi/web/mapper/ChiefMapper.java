@@ -1,0 +1,22 @@
+package com.ruoyi.web.mapper;
+
+import java.util.List;
+
+import com.ruoyi.pda.domain.VO.ChiefAuthVO;
+import com.ruoyi.pda.domain.VO.OrderHistory;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Update;
+
+import com.ruoyi.pda.domain.DTO.ChiefDTO;
+import com.ruoyi.pda.domain.DTO.ChiefQuery;
+import com.ruoyi.pda.domain.VO.ChiefVO;
+
+@Mapper
+public interface ChiefMapper {
+    List<ChiefVO> getChiefList(ChiefQuery chiefQuery);
+    @Update("UPDATE master_chief set  status=#{status}, role=#{role}, real_name=#{realName} WHERE chief_id=#{chiefId}")
+    void editChief(ChiefDTO chiefDTO);
+    ChiefVO getPerformanceSummary(long chiefId);
+    List<OrderHistory> getOrderHistory(long chiefId);
+    List<ChiefAuthVO> getChiefAuthList(ChiefQuery chiefQuery);
+}

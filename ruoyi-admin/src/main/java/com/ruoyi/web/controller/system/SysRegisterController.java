@@ -28,11 +28,19 @@ public class SysRegisterController extends BaseController
     @PostMapping("/register")
     public AjaxResult register(@RequestBody RegisterBody user)
     {
-        if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser"))))
-        {
-            return error("当前系统没有开启注册功能！");
-        }
+//        后台管理端没有注册功能，仅pda
+//        if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser"))))
+//        {
+//            return error("当前系统没有开启注册功能！");
+//        }
         String msg = registerService.register(user);
         return StringUtils.isEmpty(msg) ? success() : error(msg);
+    }
+    /**
+     * 第一次登入后的设置信息
+     */
+    @PostMapping("/register/setting")
+    public AjaxResult firstSetting(@RequestBody RegisterBody user){
+        return null;
     }
 }

@@ -1,6 +1,11 @@
 package com.ruoyi.web.controller.system;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,8 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.google.gson.Gson;
 import com.ruoyi.common.annotation.Log;
-import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
@@ -19,10 +25,13 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.file.FileUploadUtils;
-import com.ruoyi.common.utils.file.MimeTypeUtils;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysUserService;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * 个人信息 业务处理
@@ -124,7 +133,52 @@ public class SysProfileController extends BaseController
         if (!file.isEmpty())
         {
             LoginUser loginUser = getLoginUser();
-            String avatar = FileUploadUtils.upload(RuoYiConfig.getAvatarPath(), file, MimeTypeUtils.IMAGE_EXTENSION);
+            String avatar = null;
+            try {
+                // 保存文件到临时目录
+                String originalFilename = file.getOriginalFilename();
+                // 创建一个临时文件，用于存储上传的文件
+                File tempFile = File.createTempFile("upload_", originalFilename);
+                // 将上传的文件转移到临时文件中
+                file.transferTo(tempFile);
+                
+                // 构建请求体
+                Map<String, List<String>> requestMap = new HashMap<>();
+                requestMap.put("list", Collections.singletonList(tempFile.getAbsolutePath()));
+                String jsonBody = new Gson().toJson(requestMap);
+                
+                // 发送请求
+                String url = "http://127.0.0.1:36677/upload";
+                OkHttpClient client = new OkHttpClient();
+                okhttp3.RequestBody body = okhttp3.RequestBody.create(
+                    MediaType.parse("application/json"), jsonBody);
+                Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+                
+                Response response = client.newCall(request).execute();
+                String responseData = response.body().string();
+                
+                // 解析响应
+                Map map = new Gson().fromJson(responseData, Map.class);
+                Boolean isSuccess = (Boolean) map.get("success");
+                if (isSuccess) {
+                    avatar = ((List<String>) map.get("result")).get(0);
+                } else {
+                    throw new Exception("上传失败");
+                }
+                
+                // 清理资源
+                client.dispatcher().executorService().shutdown();
+                tempFile.delete();
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.err.println("上传图床过程发生错误---");
+                return error("上传图片失败");
+            }
+
             if (userService.updateUserAvatar(loginUser.getUsername(), avatar))
             {
                 AjaxResult ajax = AjaxResult.success();

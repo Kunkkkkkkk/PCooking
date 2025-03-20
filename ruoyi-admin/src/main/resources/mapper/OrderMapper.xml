@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.OrderMapper">
+    <select id="getList" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
+        orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.dish_id as dishId, mo.price,
+        mo.status, mo.create_time as createTime, mo.finish_time as finishTime, mo.comment_id as
+        commentId,  su1.nick_name as chiefName, su2.user_name as userName, md.name as
+        dishName FROM master_order mo LEFT JOIN sys_user su1 ON mo.chief_id = su1.user_id LEFT JOIN
+        sys_user su2 ON mo.user_id = su2.user_id LEFT JOIN master_dishes md ON mo.dish_id =
+        md.dish_id <where>
+            <if test="orderId!=null and orderId !=''">mo.order_id LIKE CONCAT('%', #{orderId}, '%')</if>
+            <if
+                test="status!=null and status!=''">AND mo.status = #{status}</if>
+            <if
+                test="beginTime!=null">AND mo.create_time BETWEEN #{beginTime} AND #{endTime}</if>
+        </where>
+    </select>
+<!--    把加载评论独立出来-->
+<!--    <select id="getDetailById" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as-->
+<!--        orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.dish_id as dishId, mo.price,-->
+<!--        mo.status, mo.create_time as createTime, mo.finish_time as finishTime, mo.comment_id as-->
+<!--        commentId, su1.nick_name as chiefName, su2.user_name as userName, md.name as-->
+<!--        dishName,mc.comment_id as commentId,mc.content as content,mc.image_urls as imgUrls,mc.rating as rating FROM master_order mo LEFT JOIN sys_user su1 ON mo.chief_id = su1.user_id LEFT JOIN-->
+<!--        sys_user su2 ON mo.user_id = su2.user_id LEFT JOIN master_dishes md ON mo.dish_id =-->
+<!--        md.dish_id left join master_comment mc on mo.comment_id = mc.comment_id <where>-->
+<!--        mo.order_id = #{id}-->
+<!--            </where>-->
+<!--    </select>-->
+    <select id="getDetailById" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
+        orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.dish_id as dishId, mo.price,
+        mo.status, mo.create_time as createTime, mo.finish_time as finishTime, mo.comment_id as
+        commentId, su1.nick_name as chiefName, su2.user_name as userName, md.name as
+        dishName FROM master_order mo LEFT JOIN sys_user su1 ON mo.chief_id = su1.user_id LEFT JOIN
+        sys_user su2 ON mo.user_id = su2.user_id LEFT JOIN master_dishes md ON mo.dish_id =
+        md.dish_id <where>
+            mo.order_id = #{id}
+        </where>
+    </select>
+    <select id="getReviewById" resultType="com.ruoyi.pda.domain.Comment">
+        SELECT mc.rating as rating,mc.comment_id as commentId,mc.image_urls as imgUrls,mc.content as content,mc.create_time as createTime, su.avatar as userAvatar from master_order mo
+            left join master_comment mc on mo.comment_id = mc.comment_id
+            left join sys_user su on su.user_id = mo.user_id <where>
+        mo.order_id=#{orderId}
+    </where>
+    </select>
+
+</mapper>
