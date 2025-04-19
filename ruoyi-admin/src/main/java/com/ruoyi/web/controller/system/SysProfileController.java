@@ -75,6 +75,10 @@ public class SysProfileController extends BaseController
         currentUser.setEmail(user.getEmail());
         currentUser.setPhonenumber(user.getPhonenumber());
         currentUser.setSex(user.getSex());
+        if (user.getAvatar()!=null){
+            currentUser.setAvatar(user.getAvatar());
+
+        }
         if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(currentUser))
         {
             return error("修改用户'" + loginUser.getUsername() + "'失败，手机号码已存在");
@@ -124,7 +128,7 @@ public class SysProfileController extends BaseController
     }
 
     /**
-     * 头像上传
+     * 头像上传picgo
      */
     @Log(title = "用户头像", businessType = BusinessType.UPDATE)
     @PostMapping("/avatar")
@@ -191,4 +195,15 @@ public class SysProfileController extends BaseController
         }
         return error("上传图片异常，请联系管理员");
     }
+
+
+    @PostMapping("/pdaProfileAvatar")
+    public AjaxResult pdaProfileAvatar(@RequestParam("file") MultipartFile file) throws Exception{
+        AjaxResult avatar = avatar(file);
+        String avatarUrl = avatar.get("imgUrl").toString();
+        SysUser user = new SysUser();
+        user.setAvatar(avatarUrl);
+        return updateProfile(user);
+    }
+
 }

@@ -108,7 +108,7 @@ public class RegisterController extends BaseController {
         user.setPhonenumber(phone); // 手机号
         user.setNickName("用户" + generateRandomString(6)); // 随机昵称
         user.setPassword(SecurityUtils.encryptPassword(password)); // 加密密码
-        
+        user.setAvatar("https://api.dicebear.com/7.x/avataaars/svg?seed=Felix");
         // 设置默认值
         user.setDeptId(100L); // 默认部门
         user.setStatus("0"); // 正常状态

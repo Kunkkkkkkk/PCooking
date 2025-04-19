@@ -270,6 +270,89 @@ public class SysUserController extends BaseController
         return toAjax(deptService.insertMessage(message));
     }
 
-    
+    /**
+     * 上传用户头像
+     */
+    @Log(title = "用户头像", businessType = BusinessType.UPDATE)
+    @PostMapping("/avatar")
+    public AjaxResult uploadAvatar(MultipartFile file) throws Exception
+    {
+        if (file == null)
+        {
+            return error("请选择要上传的文件");
+        }
+        
+        try
+        {
+            // 保存文件到临时目录
+            String originalFilename = file.getOriginalFilename();
+            String tempDir = System.getProperty("java.io.tmpdir");
+            java.io.File tempFile = new java.io.File(tempDir, System.currentTimeMillis() + "_" + originalFilename);
+            file.transferTo(tempFile);
+            
+            // 获取文件绝对路径
+            String filePath = tempFile.getAbsolutePath();
+            
+            // 构建请求体
+            String jsonBody = "{\"list\":[\"" + filePath.replace("\\", "\\\\") + "\"]}";
+            
+            // 创建HTTP客户端
+            java.net.URL url = new java.net.URL("http://127.0.0.1:36677/upload");
+            java.net.HttpURLConnection connection = (java.net.HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+            
+            // 发送请求
+            try (java.io.OutputStream os = connection.getOutputStream())
+            {
+                byte[] input = jsonBody.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+            
+            // 获取响应
+            int responseCode = connection.getResponseCode();
+            StringBuilder response = new StringBuilder();
+            try (java.io.BufferedReader br = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(connection.getInputStream(), "utf-8")))
+            {
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null)
+                {
+                    response.append(responseLine.trim());
+                }
+            }
+            
+            // 删除临时文件
+            tempFile.delete();
+            
+            // 解析响应JSON获取URL
+            String jsonResponse = response.toString();
+            // 简单解析，实际项目中建议使用JSON库
+            if (jsonResponse.contains("\"success\":true") && jsonResponse.contains("\"result\":["))
+            {
+                int start = jsonResponse.indexOf("\"result\":[\"") + 11;
+                int end = jsonResponse.indexOf("\"]", start);
+                if (start >= 0 && end >= 0)
+                {
+                    String imageUrl = jsonResponse.substring(start, end);
+                    
+                    // 构建返回结果
+                    AjaxResult ajax = AjaxResult.success();
+                    ajax.put("url", imageUrl);
+                    return ajax;
+                }
+            }
+            
+            return error("上传失败: " + jsonResponse);
+        }
+        catch (Exception e)
+        {
+            return error("上传失败: " + e.getMessage());
+        }
+    }
+
+
+
 }
 
