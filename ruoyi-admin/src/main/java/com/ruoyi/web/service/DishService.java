@@ -16,4 +16,5 @@ public interface DishService {
     void addIngredient(Ingredient ingredient);
     void updateIngredient(Ingredient ingredient);
     void deleteIngredient(Ingredient ingredient);
+
 }

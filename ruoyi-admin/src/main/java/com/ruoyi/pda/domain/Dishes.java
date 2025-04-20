@@ -14,4 +14,5 @@ public class Dishes {
     private String status ;
     private String image;
     private List<DishMaterial> dishMaterials;
+    private String tags;
 }

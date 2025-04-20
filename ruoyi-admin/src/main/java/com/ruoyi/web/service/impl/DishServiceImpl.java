@@ -61,4 +61,6 @@ public class DishServiceImpl implements DishService {
     public void deleteIngredient(Ingredient ingredient) {
         dishMapper.deleteIngredient(ingredient);
     }
+
+
 }

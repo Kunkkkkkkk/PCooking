@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import com.ruoyi.common.core.controller.BaseController;
@@ -35,6 +36,7 @@ public class MasterDishController extends BaseController {
         List<DishMaterial> list = dishService.getMaterialList(id);
         return AjaxResult.success(list);
     }
+    @Transactional(rollbackFor = Exception.class)
     @PostMapping("/master/dishes/updateDish")
     public AjaxResult updateDish(@RequestBody Dishes dishes) {
         dishService.updateDish(dishes);
@@ -98,6 +100,14 @@ public class MasterDishController extends BaseController {
     public AjaxResult deleteDish(@RequestBody Ingredient Ingredient) {
         AjaxResult ajaxResult = AjaxResult.success();
         dishService.deleteIngredient(Ingredient);
+        return ajaxResult;
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @PostMapping("/master/dishes/addDish")
+    public AjaxResult addDish(@RequestBody Dishes dishes) {
+        AjaxResult ajaxResult = AjaxResult.success();
+        dishes.setStatus("0");
+        dishService.insertDish(dishes);
         return ajaxResult;
     }
 
