@@ -15,35 +15,31 @@
         GROUP BY mu.phonenumber, sd.dict_label,
         mc.role,mc.real_name,mc.status,mc.join_time,mc.chief_id</select>
     <!-- 查询总数和平均时间 -->
-    <select id="getPerformanceSummary" resultType="com.ruoyi.pda.domain.VO.ChiefVO">
-        SELECT
-            COUNT(1) AS orderNum,
-            AVG(TIMESTAMPDIFF(MINUTE, mo.create_time, mo.finish_time)) AS averageTime
-        FROM master_order mo
-        WHERE mo.chief_id = #{chiefId}
-          AND mo.status = '2'
-    </select>
+    <select id="getPerformanceSummary" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT COUNT(1)
+        AS orderNum, AVG(TIMESTAMPDIFF(MINUTE, mo.create_time, mo.finish_time)) AS averageTime FROM
+        master_order mo WHERE mo.chief_id = #{chiefId} AND mo.status = '2' </select>
 
     <!-- 查询近30天订单历史 -->
-    <select id="getOrderHistory" resultType="com.ruoyi.pda.domain.VO.OrderHistory">
-        SELECT
-            DATE(mo.finish_time) AS date,
-            COUNT(1) AS orderCount
-        FROM master_order mo
-        WHERE mo.chief_id = #{chiefId}
-          AND mo.status = '2'
-          AND mo.finish_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-        GROUP BY DATE(mo.finish_time)
-    </select>
-    <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO">
-        select mca.auth_id as authId,mca.real_name as realName,mca.id_code as idCode,mca.request_time as requestTime,mca.identify_image as image,mca.status as status,mca.user_id as userId,mca.years as years,mca.cuisine as cuisine,mca.remark as remark,mca.reply as reply,su.phonenumber as phone,su.sex as sex from master_chief_auth mca left join sys_user su on mca.user_id = su.user_id <where>
-        <if test="name !=null and name != ''">
-            and real_name like CONCAT('%', #{name}, '%')
-        </if>
-        <if test="status != null and status != ''">
-            and mca.status = #{status}
-        </if>
-    </where>
-    order by mca.request_time ASC
-    </select>
+    <select id="getOrderHistory" resultType="com.ruoyi.pda.domain.VO.OrderHistory"> SELECT
+        DATE(mo.finish_time) AS date, COUNT(1) AS orderCount FROM master_order mo WHERE mo.chief_id
+        = #{chiefId} AND mo.status = '2' AND mo.finish_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        GROUP BY DATE(mo.finish_time) </select>
+    <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select
+        mca.auth_id as authId,mca.real_name as realName,mca.id_code as idCode,mca.request_time as
+        requestTime,mca.identify_image as image,mca.status as status,mca.user_id as userId,mca.years
+        as years,mca.cuisine as cuisine,mca.remark as remark,mca.reply as reply,su.phonenumber as
+        phone,su.sex as sex from master_chief_auth mca left join sys_user su on mca.user_id =
+        su.user_id <where>
+            <if test="name !=null and name != ''"> and real_name like CONCAT('%', #{name}, '%') </if>
+        <if
+                test="status != null and status != ''"> and mca.status = #{status} </if>
+        </where>
+        order by mca.request_time ASC </select>
+
+    <!-- 新增厨师认证申请 -->
+    <insert id="insertChiefAuth" parameterType="com.ruoyi.pda.domain.ChiefAuth"> insert into
+        master_chief_auth(user_id, real_name, id_code, link_phone, years, cuisine, identify_image,
+        remark, status, request_time) values(#{userId}, #{realName}, #{idCode}, #{linkPhone},
+        #{years}, #{cuisine}, #{image}, #{remark}, #{status}, #{requestTime}) </insert>
+
 </mapper>
