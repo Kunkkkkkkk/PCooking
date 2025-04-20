@@ -2,8 +2,9 @@ package com.ruoyi.pda.mapper;
 
 import java.util.List;
 
-import com.ruoyi.pda.domain.SocialComment;
 import org.apache.ibatis.annotations.Mapper;
+
+import com.ruoyi.pda.domain.SocialComment;
 
 /**
  * 社交评论 数据层
@@ -74,6 +75,14 @@ public interface SocialCommentMapper
      * @return 结果
      */
     public int deleteSocialCommentByIds(String[] commentIds);
+
+    /**
+     * 删除主评论及其所有回复
+     * 
+     * @param commentId 主评论ID
+     * @return 结果
+     */
+    public int deleteCommentAndReplies(Long commentId);
 
     /**
      * 获取社交内容评论数量

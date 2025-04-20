@@ -165,13 +165,21 @@ public class SocialController extends BaseController
     }
     
     /**
+     * 获取用户评论列表
+     */
+    @GetMapping("/userComments")
+    public AjaxResult userComments()
+    {
+        return success(socialService.selectUserComments(SecurityUtils.getUserId()));
+    }
+
+    /**
      * 删除评论
      */
-    @Log(title = "删除社交内容评论", businessType = BusinessType.DELETE)
     @DeleteMapping("/comment/{commentId}")
-    public AjaxResult removeComment(@PathVariable Long commentId)
+    public AjaxResult deleteComment(@PathVariable("commentId") Long commentId)
     {
-        return toAjax(socialService.deleteSocialCommentById(commentId));
+        return toAjax(socialService.deleteSocialComment(commentId));
     }
 
     /**

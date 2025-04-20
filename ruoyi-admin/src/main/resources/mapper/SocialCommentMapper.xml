@@ -26,14 +26,9 @@
         <where> c.status = '0' <if test="socialId != null">
         AND c.social_id = #{socialId} </if>
             <if test="userId != null"> AND c.user_id = #{userId} </if>
-            <if
-                test="content != null and content != ''"> AND c.content like concat('%', #{content},
-        '%') </if>
-            <if test="parentId != null"> AND c.parent_id = #{parentId} </if>
-            <if
-                test="parentId == null"> AND c.parent_id is null </if>
-        </where> order by
-        c.create_time desc </select>
+
+        </where>
+        order by c.create_time desc </select>
 
     <select id="selectSocialCommentBySocialId" parameterType="Long" resultMap="SocialCommentResult">
         <include refid="selectSocialCommentVo" /> where c.social_id = #{socialId} and c.status = '0'
@@ -70,4 +65,7 @@
         status = '1' where comment_id in <foreach item="commentId" collection="array" open="("
             separator="," close=")"> #{commentId} </foreach>
     </delete>
+
+    <update id="deleteCommentAndReplies" parameterType="Long"> update master_social_comment set
+        status = '1' where comment_id = #{commentId} or parent_id = #{commentId} </update>
 </mapper> 

@@ -209,4 +209,14 @@ public interface ISocialService
      * @return 社交内容集合
      */
     public List<Social> selectUserLikes(Long userId);
+
+    /**
+     * 查询用户发表的评论列表
+     * 
+     * @param userId 用户ID
+     * @return 评论集合
+     */
+    public List<SocialComment> selectUserComments(Long userId);
+
+    int deleteSocialComment(Long commentId);
 } 

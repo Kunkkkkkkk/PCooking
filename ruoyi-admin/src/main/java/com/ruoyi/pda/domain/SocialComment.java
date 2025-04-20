@@ -51,6 +51,9 @@ public class SocialComment extends BaseEntity
     /** 时间显示 */
     private String timeAgo;
 
+    /** 关联的社交内容 */
+    private Social social;
+
     public Long getCommentId()
     {
         return commentId;
@@ -151,5 +154,15 @@ public class SocialComment extends BaseEntity
     public void setTimeAgo(String timeAgo)
     {
         this.timeAgo = timeAgo;
+    }
+
+    public Social getSocial()
+    {
+        return social;
+    }
+
+    public void setSocial(Social social)
+    {
+        this.social = social;
     }
 } 

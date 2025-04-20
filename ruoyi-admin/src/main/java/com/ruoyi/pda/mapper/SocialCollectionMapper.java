@@ -2,6 +2,7 @@ package com.ruoyi.pda.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.ruoyi.pda.domain.SocialCollection;
@@ -9,6 +10,7 @@ import com.ruoyi.pda.domain.SocialCollection;
 /**
  * 社交收藏 数据层
  */
+@Mapper
 public interface SocialCollectionMapper
 {
     /**

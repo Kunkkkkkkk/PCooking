@@ -426,4 +426,45 @@ public class SocialServiceImpl implements ISocialService
         
         return result;
     }
+
+    /**
+     * 查询用户发表的评论列表
+     * 
+     * @param userId 用户ID
+     * @return 评论集合
+     */
+    @Override
+    public List<SocialComment> selectUserComments(Long userId)
+    {
+        SocialComment query = new SocialComment();
+        query.setUserId(userId);
+        List<SocialComment> comments = socialCommentMapper.selectSocialCommentList(query);
+        
+        // 对于每个评论，获取其关联的社交内容信息
+        for (SocialComment comment : comments) {
+            if (comment.getSocialId() != null) {
+                Social social = socialMapper.selectSocialById(comment.getSocialId());
+                comment.setSocial(social);
+            }
+        }
+        
+        return comments;
+    }
+
+    /**
+     * 删除评论及其所有回复
+     * 
+     * @param commentId 评论ID
+     * @return 结果
+     */
+    @Override
+    public int deleteSocialComment(Long commentId) {
+
+        // 使用新的方法一次性删除评论及其所有回复
+        int rows = socialCommentMapper.deleteCommentAndReplies(commentId);
+        
+
+        return rows;
+    }
+
 } 
