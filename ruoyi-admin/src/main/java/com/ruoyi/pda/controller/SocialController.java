@@ -1,16 +1,19 @@
 package com.ruoyi.pda.controller;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.google.gson.Gson;
+import com.ruoyi.common.core.domain.model.LoginUser;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
@@ -22,6 +25,7 @@ import com.ruoyi.pda.domain.Social;
 import com.ruoyi.pda.domain.SocialComment;
 import com.ruoyi.pda.domain.SocialLike;
 import com.ruoyi.pda.service.ISocialService;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 社交内容 控制层
@@ -240,4 +244,63 @@ public class SocialController extends BaseController
     {
         return success(socialService.selectUserLikes(SecurityUtils.getUserId()));
     }
+
+    @PostMapping("/uploadImage")
+    public AjaxResult uploadImage(@RequestParam("imageFile") MultipartFile file)throws Exception {
+        if (!file.isEmpty())
+    {
+        LoginUser loginUser = getLoginUser();
+        String imageUrl = null;
+        try {
+            // 保存文件到临时目录
+            String originalFilename = file.getOriginalFilename();
+            // 创建一个临时文件，用于存储上传的文件
+            File tempFile = File.createTempFile("upload_", originalFilename);
+            // 将上传的文件转移到临时文件中
+            file.transferTo(tempFile);
+
+            // 构建请求体
+            Map<String, List<String>> requestMap = new HashMap<>();
+            requestMap.put("list", Collections.singletonList(tempFile.getAbsolutePath()));
+            String jsonBody = new Gson().toJson(requestMap);
+
+            // 发送请求
+            String url = "http://127.0.0.1:36677/upload";
+            OkHttpClient client = new OkHttpClient();
+            okhttp3.RequestBody body = okhttp3.RequestBody.create(
+                    MediaType.parse("application/json"), jsonBody);
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            String responseData = response.body().string();
+
+            // 解析响应
+            Map map = new Gson().fromJson(responseData, Map.class);
+            Boolean isSuccess = (Boolean) map.get("success");
+            if (isSuccess) {
+                imageUrl = ((List<String>) map.get("result")).get(0);
+            } else {
+                throw new Exception("上传失败");
+            }
+
+            // 清理资源
+            client.dispatcher().executorService().shutdown();
+            tempFile.delete();
+
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("imgUrl", imageUrl);
+            return ajax;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("上传图床过程发生错误---");
+            return error("上传图片失败");
+        }
+
+
+    }
+        return error("上传图片异常，请联系管理员");}
+
 }
