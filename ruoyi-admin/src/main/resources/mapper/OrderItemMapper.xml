@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.OrderItemMapper">
+    <!-- 插入订单项记录 -->
+    <insert id="insertOrderItem" parameterType="com.ruoyi.pda.domain.DTO.OrderItem"> INSERT INTO
+        master_order_item ( order_id, dish_id, quantity, price, lack_material ) VALUES (
+        #{item.orderId}, #{item.dishId}, #{item.quantity}, #{item.price}, #{item.lackMaterial} ) </insert>
+
+    <!-- 获取订单的所有订单项，并连接菜品表获取菜品信息 -->
+    <select id="selectByOrderId" resultMap="OrderItemResultMap"> SELECT moi.id, moi.order_id,
+        moi.dish_id, moi.quantity, moi.price, moi.lack_material, md.name as dish_name, md.image as
+        dish_image, md.image as dish_image_url FROM master_order_item moi LEFT JOIN
+        master_dishes md ON moi.dish_id = md.dish_id WHERE moi.order_id = #{orderId} </select>
+
+    <!-- 订单项结果映射 -->
+    <resultMap id="OrderItemResultMap" type="com.ruoyi.pda.domain.DTO.OrderItem">
+        <id property="id" column="id" />
+        <result property="orderId" column="order_id" />
+        <result property="dishId" column="dish_id" />
+        <result property="quantity" column="quantity" />
+        <result property="price" column="price" />
+        <result property="lackMaterial" column="lack_material" />
+        <result property="dishName" column="dish_name" />
+        <result property="dishImage" column="dish_image" />
+        <result property="dishImageUrl" column="dish_image_url" />
+    </resultMap>
+</mapper> 
