@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.pda.mapper.SocialLikeMapper">
+
+    <resultMap type="com.ruoyi.pda.domain.SocialLike" id="SocialLikeResult">
+        <id property="likeId" column="like_id" />
+        <result property="socialId" column="social_id" />
+        <result property="userId" column="user_id" />
+        <result property="createTime" column="create_time" />
+        <association property="user" column="user_id"
+            javaType="com.ruoyi.common.core.domain.entity.SysUser" resultMap="userResult" />
+    </resultMap>
+
+    <resultMap id="userResult" type="com.ruoyi.common.core.domain.entity.SysUser">
+        <id property="userId" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="nickName" column="nick_name" />
+        <result property="email" column="email" />
+        <result property="phonenumber" column="phonenumber" />
+        <result property="sex" column="sex" />
+        <result property="avatar" column="avatar" />
+        <result property="status" column="status" />
+        <result property="loginDate" column="login_date" />
+    </resultMap>
+
+    <sql id="selectSocialLikeVo"> select l.like_id, l.social_id, l.user_id, l.create_time,
+        u.user_name, u.nick_name, u.email, u.phonenumber, u.sex, u.avatar, u.status, u.login_date
+        from master_social_like l left join sys_user u on l.user_id = u.user_id </sql>
+
+    <select id="selectSocialLikeList" parameterType="com.ruoyi.pda.domain.SocialLike"
+        resultMap="SocialLikeResult">
+        <include refid="selectSocialLikeVo" />
+        <where>
+            <if test="socialId != null"> AND l.social_id = #{socialId} </if>
+            <if
+                test="userId != null"> AND l.user_id = #{userId} </if>
+        </where> order by
+        l.create_time desc </select>
+
+    <select id="selectSocialLikeBySocialId" parameterType="Long" resultMap="SocialLikeResult">
+        <include refid="selectSocialLikeVo" /> where l.social_id = #{socialId} order by
+        l.create_time desc </select>
+
+    <select id="selectSocialLikeByUserAndSocial" resultMap="SocialLikeResult">
+        <include refid="selectSocialLikeVo" /> where l.social_id = #{socialId} and l.user_id =
+        #{userId} limit 1 </select>
+
+    <select id="countSocialLike" parameterType="Long" resultType="Integer"> select count(1) from
+        master_social_like where social_id = #{socialId} </select>
+
+    <insert id="insertSocialLike" parameterType="com.ruoyi.pda.domain.SocialLike"
+        useGeneratedKeys="true" keyProperty="likeId"> insert into master_social_like ( <if
+            test="likeId != null">like_id,</if>
+            <if test="socialId != null">social_id,</if>
+            <if
+            test="userId != null">user_id,</if> create_time ) values ( <if test="likeId != null">
+        #{likeId},</if>
+            <if test="socialId != null">#{socialId},</if>
+            <if test="userId != null">
+        #{userId},</if> sysdate() ) </insert>
+
+    <delete id="deleteSocialLikeById" parameterType="Long"> delete from master_social_like where
+        like_id = #{likeId} </delete>
+
+    <delete id="deleteSocialLikeByIds" parameterType="String"> delete from master_social_like where
+        like_id in <foreach item="likeId" collection="array" open="(" separator="," close=")">
+        #{likeId} </foreach>
+    </delete>
+
+    <delete id="deleteSocialLikeByUserAndSocial"> delete from master_social_like where social_id =
+        #{socialId} and user_id = #{userId} </delete>
+</mapper> 

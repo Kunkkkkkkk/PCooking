@@ -71,11 +71,22 @@ public class SysProfileController extends BaseController
     {
         LoginUser loginUser = getLoginUser();
         SysUser currentUser = loginUser.getUser();
-        currentUser.setNickName(user.getNickName());
-        currentUser.setEmail(user.getEmail());
-        currentUser.setPhonenumber(user.getPhonenumber());
-        currentUser.setSex(user.getSex());
-        if (user.getAvatar()!=null){
+        if (user.getNickName()!=null && !user.getNickName().equals("")){
+            currentUser.setNickName(user.getNickName());
+        }
+        if (user.getEmail()!=null && !user.getEmail().equals("")){
+            currentUser.setEmail(user.getEmail());
+        }
+        if (user.getPhonenumber()!=null && !user.getPhonenumber().equals("")){
+            currentUser.setPhonenumber(user.getPhonenumber());
+        }
+        if (user.getSex()!=null && !user.getSex().equals("")){
+            currentUser.setSex(user.getSex());
+        }
+            
+        
+       
+        if (user.getAvatar()!=null && !user.getAvatar().equals("")){
             currentUser.setAvatar(user.getAvatar());
 
         }
@@ -201,9 +212,12 @@ public class SysProfileController extends BaseController
     public AjaxResult pdaProfileAvatar(@RequestParam("file") MultipartFile file) throws Exception{
         AjaxResult avatar = avatar(file);
         String avatarUrl = avatar.get("imgUrl").toString();
+        LoginUser loginUser1 = getLoginUser();
         SysUser user = new SysUser();
         user.setAvatar(avatarUrl);
-        return updateProfile(user);
+        updateProfile(user);
+        LoginUser loginUser2 = getLoginUser();
+        return success();
     }
 
 }
