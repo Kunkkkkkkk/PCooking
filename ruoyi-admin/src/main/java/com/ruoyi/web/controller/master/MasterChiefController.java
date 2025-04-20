@@ -58,7 +58,29 @@ public class MasterChiefController extends BaseController {
      */
     @PostMapping("/chief/apply")
     public AjaxResult applyForChef(@Validated @RequestBody ChiefApplyDTO applyDTO) {
-        boolean result = chiefService.applyForChef(applyDTO);
-        return result ? AjaxResult.success("申请提交成功，请等待审核") : AjaxResult.error("申请提交失败");
+        try {
+            boolean result = chiefService.applyForChef(applyDTO);
+            return result ? AjaxResult.success("申请提交成功，请等待审核") : AjaxResult.error("申请提交失败");
+        } catch (RuntimeException e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取当前用户的厨师申请信息
+     */
+    @GetMapping("/chief/myApplication")
+    public AjaxResult getMyApplication() {
+        ChiefAuthVO application = chiefService.getMyApplication();
+        return AjaxResult.success(application);
+    }
+
+    /**
+     * 获取当前登录用户的厨师信息（如果用户是厨师）
+     */
+    @GetMapping("/chief/info")
+    public AjaxResult getCurrentChefInfo() {
+        ChiefVO chefInfo = chiefService.getCurrentChefInfo();
+        return AjaxResult.success(chefInfo);
     }
 }

@@ -23,4 +23,16 @@ public interface ChiefService {
      * @return 结果
      */
     boolean applyForChef(ChiefApplyDTO applyDTO);
+
+    /**
+     * 获取当前用户的厨师申请信息
+     * @return 申请信息，如果不存在则返回null
+     */
+    ChiefAuthVO getMyApplication();
+
+    /**
+     * 检查当前登录用户是否为有效厨师
+     * @return 如果是厨师则返回厨师信息，否则返回null
+     */
+    ChiefVO getCurrentChefInfo();
 }

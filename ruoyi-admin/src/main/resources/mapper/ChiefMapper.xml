@@ -42,4 +42,18 @@
         remark, status, request_time) values(#{userId}, #{realName}, #{idCode}, #{linkPhone},
         #{years}, #{cuisine}, #{image}, #{remark}, #{status}, #{requestTime}) </insert>
 
+    <!-- 根据用户ID查询最新的厨师认证申请 -->
+    <select id="getChiefAuthByUserId" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select
+        mca.auth_id as authId, mca.real_name as realName, mca.id_code as idCode, mca.request_time as
+        requestTime, mca.identify_image as image, mca.status as status, mca.user_id as userId,
+        mca.years as years, mca.cuisine as cuisine, mca.remark as remark, mca.reply as reply,
+        mca.link_phone as phone, su.sex as sex from master_chief_auth mca left join sys_user su on
+        mca.user_id = su.user_id where mca.user_id = #{userId} order by mca.request_time DESC limit
+        1 </select>
+
+    <!-- 根据用户ID查询厨师信息 -->
+    <select id="findChiefByUserId" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT chief_id as
+        id, user_id as userId, real_name as name, status, role FROM master_chief WHERE user_id =
+        #{userId} AND status = '0' -- 假设 '0' 代表状态正常/已启用 LIMIT 1 </select>
+
 </mapper>
