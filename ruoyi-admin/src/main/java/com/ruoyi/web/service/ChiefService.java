@@ -3,6 +3,7 @@ package com.ruoyi.web.service;
 import java.util.List;
 
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
+import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import com.ruoyi.pda.domain.DTO.ChiefDTO;
 import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
@@ -35,4 +36,18 @@ public interface ChiefService {
      * @return 如果是厨师则返回厨师信息，否则返回null
      */
     ChiefVO getCurrentChefInfo();
+
+    /**
+     * 审核通过厨师认证申请
+     * @param authDTO 包含 userId 和 realName
+     * @return 操作结果
+     */
+    boolean approveChiefAuth(ChiefAuthDTO authDTO);
+
+    /**
+     * 拒绝厨师认证申请
+     * @param authDTO 包含 userId 和 reason
+     * @return 操作结果
+     */
+    boolean rejectChiefAuth(ChiefAuthDTO authDTO);
 }

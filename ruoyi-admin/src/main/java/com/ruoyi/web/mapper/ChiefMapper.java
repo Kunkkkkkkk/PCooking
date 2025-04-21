@@ -42,4 +42,27 @@ public interface ChiefMapper {
      * @return 厨师基本信息或null
      */
     ChiefVO findChiefByUserId(@Param("userId") Long userId);
+
+    /**
+     * 审核通过厨师认证申请 (更新状态为1)
+     * @param userId 用户ID
+     * @return 结果
+     */
+    int approveChiefAuth(@Param("userId") Long userId);
+
+    /**
+     * 拒绝厨师认证申请 (更新状态为2，并记录原因)
+     * @param userId 用户ID
+     * @param reason 拒绝原因
+     * @return 结果
+     */
+    int rejectChiefAuth(@Param("userId") Long userId, @Param("reason") String reason);
+
+    /**
+     * 插入厨师信息 (审核通过后调用)
+     * @param userId 用户ID
+     * @param realName 真实姓名
+     * @return 结果
+     */
+    int insertChief(@Param("userId") Long userId, @Param("realName") String realName);
 }

@@ -34,7 +34,7 @@
         <if
                 test="status != null and status != ''"> and mca.status = #{status} </if>
         </where>
-        order by mca.request_time ASC </select>
+        order by mca.request_time DESC </select>
 
     <!-- 新增厨师认证申请 -->
     <insert id="insertChiefAuth" parameterType="com.ruoyi.pda.domain.ChiefAuth"> insert into
@@ -56,4 +56,15 @@
         id, user_id as userId, real_name as name, status, role FROM master_chief WHERE user_id =
         #{userId} AND status = '0' -- 假设 '0' 代表状态正常/已启用 LIMIT 1 </select>
 
+    <!-- 审核通过厨师认证申请 -->
+    <update id="approveChiefAuth"> UPDATE master_chief_auth SET status = '1' WHERE user_id =
+        #{userId} </update>
+
+    <!-- 拒绝厨师认证申请 -->
+    <update id="rejectChiefAuth"> UPDATE master_chief_auth SET status = '2', reply = #{reason} WHERE
+        user_id = #{userId} </update>
+
+    <!-- 插入厨师信息 -->
+    <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role, join_time)
+        VALUES (#{userId}, #{realName}, '0', '107', NOW()) </insert>
 </mapper>

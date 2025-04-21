@@ -15,6 +15,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
+import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import com.ruoyi.pda.domain.DTO.ChiefDTO;
 import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
@@ -82,5 +83,37 @@ public class MasterChiefController extends BaseController {
     public AjaxResult getCurrentChefInfo() {
         ChiefVO chefInfo = chiefService.getCurrentChefInfo();
         return AjaxResult.success(chefInfo);
+    }
+
+    /**
+     * 审核通过厨师认证申请
+     */
+    @PostMapping("/chiefAuth/approve")
+    public AjaxResult approveChiefAuth(@Validated @RequestBody ChiefAuthDTO authDTO) {
+        try {
+            boolean result = chiefService.approveChiefAuth(authDTO);
+            return result ? AjaxResult.success("审核通过成功") : AjaxResult.error("审核操作失败");
+        } catch (IllegalArgumentException e) {
+             return AjaxResult.error("审核失败：" + e.getMessage());
+        } catch (RuntimeException e) {
+            // Log the exception e
+            return AjaxResult.error("审核操作失败，请联系管理员");
+        }
+    }
+
+    /**
+     * 拒绝厨师认证申请
+     */
+    @PostMapping("/chiefAuth/reject")
+    public AjaxResult rejectChiefAuth(@Validated @RequestBody ChiefAuthDTO authDTO) {
+         try {
+            boolean result = chiefService.rejectChiefAuth(authDTO);
+            return result ? AjaxResult.success("拒绝成功") : AjaxResult.error("拒绝操作失败");
+        } catch (IllegalArgumentException e) {
+             return AjaxResult.error("拒绝失败：" + e.getMessage());
+        } catch (RuntimeException e) {
+            // Log the exception e
+            return AjaxResult.error("拒绝操作失败，请联系管理员");
+        }
     }
 }
