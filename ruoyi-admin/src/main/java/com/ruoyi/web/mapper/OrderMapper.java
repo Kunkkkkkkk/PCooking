@@ -103,4 +103,6 @@ public interface OrderMapper {
     void updateOrderCommentId(@Param("orderId")long orderId, @Param("commentId")long commentId);
 
     OrderVO getCurrentOrder(@Param("userId")long userId);
+
+    List<OrderVO> getList2(OrderQuery orderQuery);
 }

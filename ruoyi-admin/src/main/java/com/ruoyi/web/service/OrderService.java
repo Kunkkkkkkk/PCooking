@@ -44,4 +44,6 @@ public interface OrderService {
 
     //获取当前订单
     OrderVO getCurrentOrder();
+
+    List<OrderVO> getList2(OrderQuery orderQuery);
 }

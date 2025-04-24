@@ -36,6 +36,13 @@ public class MasterOrderController extends BaseController {
         List<OrderVO> list = orderService.getList(orderQuery);
         return getDataTable(list);
     }
+    //后台查看订单
+    @GetMapping("/master/order/pageList2")
+    public TableDataInfo pageList2(OrderQuery orderQuery) {
+        startPage();
+        List<OrderVO> list = orderService.getList2(orderQuery);
+        return getDataTable(list);
+    }
     //获取订单详情
     @GetMapping("/master/order/detail")
     public AjaxResult detail(@RequestParam("orderId") long orderId) {

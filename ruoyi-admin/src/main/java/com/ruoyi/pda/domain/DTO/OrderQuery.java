@@ -15,4 +15,5 @@ public class OrderQuery{
     private LocalDateTime endTime;   // 结束时间
     private String status;
     private long userId;
+    private String userName;
 }

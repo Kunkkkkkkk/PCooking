@@ -209,5 +209,10 @@ public class OrderServiceImpl implements OrderService {
         Long userId = SecurityUtils.getUserId();
         return orderMapper.getCurrentOrder(userId);
     }
+
+    @Override
+    public List<OrderVO> getList2(OrderQuery orderQuery) {
+        return orderMapper.getList2(orderQuery);
+    }
 }
 
