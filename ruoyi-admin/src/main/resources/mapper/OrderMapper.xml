@@ -4,40 +4,70 @@
     <!-- 查询订单列表 -->
     <select id="getList" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
         orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status, mo.create_time
-        as createTime, mo.order_time as orderTime, mo.comment_id as commentId, su1.nick_name as
-        chiefName, mc.real_name as chiefRealName, su1.avatar as chiefAvatar, su2.user_name as
-        userName FROM master_order mo LEFT JOIN sys_user su1 ON mo.chief_id = su1.user_id LEFT JOIN
-        master_chief mc ON mo.chief_id = mc.chief_id LEFT JOIN sys_user su2 ON mo.user_id =
-        su2.user_id <where>
+        as createTime, mo.order_time as orderTime, mc.real_name as chiefRealName, su1.avatar as
+        chiefAvatar, su2.user_name as userName,mo.comment_id as commentId,mo.remark as
+        remark,mo.cooked_time as cookedTime FROM master_order mo LEFT JOIN master_chief mc ON
+        mo.chief_id = mc.chief_id LEFT JOIN sys_user su1 ON mc.user_id = su1.user_id LEFT JOIN
+        sys_user su2 ON mo.user_id = su2.user_id <where>
             <if test="orderId!=null and orderId !=''">mo.order_id LIKE CONCAT('%', #{orderId}, '%')</if>
             <if
                 test="status!=null and status!=''">AND mo.status = #{status}</if>
             <if
                 test="beginTime!=null">AND mo.create_time BETWEEN #{beginTime} AND #{endTime}</if>
+            <if
+                test="userId!=null and userId!=''">AND mo.user_id=#{userId}</if>
         </where>
-    </select>
+        order by mo.create_time desc </select>
+
+    <!-- 查询订单列表 -->
+    <select id="getOrderList" resultType="com.ruoyi.pda.domain.VO.OrderVO"
+        parameterType="java.util.Map"> SELECT mo.order_id as orderId, mo.chief_id as chiefId,
+        mo.user_id as userId, mo.price, mo.status, mo.create_time as createTime, mo.order_time as
+        orderTime, su2.user_name as userName,mo.comment_id as commentId,mo.remark as remark FROM
+        master_order mo LEFT JOIN master_chief mc ON mo.chief_id = mc.chief_id LEFT JOIN sys_user
+        su1 ON mc.user_id = su1.user_id LEFT JOIN sys_user su2 ON mo.user_id = su2.user_id <where>
+            <if test="status!=null and status!=''">AND mo.status = #{status}</if>
+            <if
+                test="chiefId!=null">AND mo.chief_id=#{chiefId}</if>
+
+        </where> order by
+        mo.create_time desc </select>
 
     <!-- 查询订单详情 -->
     <select id="getDetail" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
         orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status, mo.create_time
-        as createTime, mo.order_time as orderTime, mo.comment_id as commentId, mo.remark,
-        su1.nick_name as chiefName, mc.real_name as chiefRealName, su1.avatar as chiefAvatar,
-        su2.user_name as userName FROM master_order mo LEFT JOIN sys_user su1 ON mo.chief_id =
-        su1.user_id LEFT JOIN master_chief mc ON mo.chief_id = mc.chief_id LEFT JOIN sys_user su2 ON
-        mo.user_id = su2.user_id WHERE mo.order_id = #{orderId} </select>
+        as createTime, mo.order_time as orderTime, mo.remark, mc.real_name as chiefRealName,
+        su1.avatar as chiefAvatar, su2.nick_name as userName, su2.avatar as userAvatar FROM
+        master_order mo LEFT JOIN master_chief mc ON mo.chief_id = mc.chief_id LEFT JOIN sys_user
+        su1 ON mc.user_id = su1.user_id LEFT JOIN sys_user su2 ON mo.user_id = su2.user_id WHERE
+        mo.order_id = #{orderId} </select>
 
     <!-- 查询订单评论 -->
     <select id="getReview" resultType="com.ruoyi.pda.domain.Comment"> SELECT mc.rating as rating,
         mc.comment_id as commentId, mc.image_urls as imgUrls, mc.content as content, mc.create_time
         as createTime, su.avatar as userAvatar FROM master_order mo LEFT JOIN master_comment mc ON
-        mo.comment_id = mc.comment_id LEFT JOIN sys_user su ON su.user_id = mo.user_id WHERE
-        mo.order_id = #{orderId} </select>
+        mo.order_id = mc.order_id LEFT JOIN sys_user su ON su.user_id = mo.user_id WHERE mo.order_id
+        = #{orderId} limit 1 </select>
+    <select id="getUnCookedList" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
+        orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status, mo.create_time
+        as createTime, mo.order_time as orderTime, mc.real_name as chiefRealName, su1.avatar as
+        chiefAvatar, su2.user_name as userName,mo.comment_id as commentId,mo.remark as remark FROM
+        master_order mo LEFT JOIN master_chief mc ON mo.chief_id = mc.chief_id LEFT JOIN sys_user
+        su1 ON mc.user_id = su1.user_id LEFT JOIN sys_user su2 ON mo.user_id = su2.user_id <where>
+        mo.chief_id = #{chiefId} AND mo.status = '1' AND mo.cooked_time is null </where> order by
+        mo.create_time desc </select>
+    <update id="accept"> UPDATE master_order SET status='-3',chief_id=#{chiefId} WHERE order_id =
+        #{orderId} </update>
 
     <!-- 插入订单记录，并返回自增主键 -->
     <insert id="insertOrder" parameterType="com.ruoyi.pda.domain.Order" useGeneratedKeys="true"
         keyProperty="orderId"> INSERT INTO master_order ( user_id, price, status, create_time,
-        order_time, remark ) VALUES ( #{userId}, #{price}, #{status}, #{createTime}, #{orderTime},
-        #{remark} ) </insert>
+        order_time, remark,chief_id ) VALUES ( #{userId}, #{price}, #{status}, #{createTime},
+        #{orderTime}, #{remark},#{chiefId} ) </insert>
+    <insert id="insertComment" useGeneratedKeys="true" keyProperty="orderCommentDTO.commentId">
+        INSERT INTO master_comment ( rating, content, image_urls, create_time, order_id, dish_id)
+        VALUES ( #{orderCommentDTO.rating}, #{orderCommentDTO.content},
+        #{orderCommentDTO.imagesUrls}, NOW(), #{orderCommentDTO.orderId}, #{dishId}) </insert>
 
     <!-- 更新订单状态 -->
     <update id="updateOrderStatus" parameterType="com.ruoyi.pda.domain.Order"> UPDATE master_order
@@ -49,6 +79,13 @@
         status IN ('-1', '0') </update>
 
     <!-- 取消超时未支付订单 -->
-    <update id="cancelTimeoutOrders"> UPDATE master_order SET status = '-2'
-        WHERE status = '-1' AND create_time &lt; DATE_SUB(NOW(), INTERVAL 5 MINUTE) </update>
+    <update id="cancelTimeoutOrders"> UPDATE master_order SET status = '-2' WHERE status = '-1' AND
+        create_time &lt; DATE_SUB(NOW(), INTERVAL 5 MINUTE) </update>
+
+    <!-- getCurrentOrder -->
+
+    <select id="getCurrentOrder" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT order_id as
+        orderId,chief_id as chiefId,user_id as userId,price,status,create_time as
+        createTime,order_time as orderTime,remark FROM master_order WHERE status not in ('-2','2')
+        AND user_id=#{userId} ORDER BY create_time DESC LIMIT 1 </select>
 </mapper>

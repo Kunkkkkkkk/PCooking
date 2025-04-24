@@ -8,6 +8,7 @@ import com.ruoyi.pda.domain.DTO.ChiefDTO;
 import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
 import com.ruoyi.pda.domain.VO.ChiefVO;
+import com.ruoyi.pda.domain.VO.OrderVO;
 
 public interface ChiefService {
     List<ChiefVO> getChiefList(ChiefQuery chiefQuery);
@@ -50,4 +51,32 @@ public interface ChiefService {
      * @return 操作结果
      */
     boolean rejectChiefAuth(ChiefAuthDTO authDTO);
+
+    /**
+     * 获取预约时间里可用的厨师信息
+     * @param appointmentTime 预约时间
+     * @return 可用的厨师信息
+     */
+    List<ChiefVO> getChefs(String appointmentTime);
+
+    /**
+     * 获取新订单列表
+     * @return 新订单列表
+     */
+    List<OrderVO> getNewOrders();
+
+    /**
+     * 获取我的订单列表
+     * @param userId 用户ID
+     * @param status 订单状态
+     * @return 我的订单列表
+     */
+    List<OrderVO> getMyPendingOrders(Long userId, String status);
+
+    /**
+     * 根据用户ID查询厨师信息
+     * @param userId 用户ID
+     * @return 厨师信息
+     */
+    ChiefVO findChiefByUserId(Long userId);
 }

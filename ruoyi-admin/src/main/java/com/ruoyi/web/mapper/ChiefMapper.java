@@ -12,6 +12,7 @@ import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
 import com.ruoyi.pda.domain.VO.ChiefVO;
 import com.ruoyi.pda.domain.VO.OrderHistory;
+import com.ruoyi.pda.domain.VO.OrderVO;
 
 @Mapper
 public interface ChiefMapper {
@@ -65,4 +66,26 @@ public interface ChiefMapper {
      * @return 结果
      */
     int insertChief(@Param("userId") Long userId, @Param("realName") String realName);
+
+
+    /**
+     * 获取预约时间里可用的厨师信息
+     * @param appointmentTime 预约时间
+     * @return 可用的厨师信息
+     */
+    List<ChiefVO> getChefs(@Param("appointmentTime") String appointmentTime);
+
+
+    /**
+     * 获取新订单列表
+     * @return 新订单列表
+     */
+    List<OrderVO> getNewOrders();
+
+    /**
+     * 获取我的订单列表
+     * @param userId 用户ID
+     * @return 我的订单列表
+     */
+    List<OrderVO> getMyPendingOrders(@Param("userId") Long userId, @Param("status") String status);
 }

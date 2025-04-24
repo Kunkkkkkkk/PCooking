@@ -16,8 +16,8 @@
         mc.role,mc.real_name,mc.status,mc.join_time,mc.chief_id</select>
     <!-- 查询总数和平均时间 -->
     <select id="getPerformanceSummary" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT COUNT(1)
-        AS orderNum, AVG(TIMESTAMPDIFF(MINUTE, mo.create_time, mo.finish_time)) AS averageTime FROM
-        master_order mo WHERE mo.chief_id = #{chiefId} AND mo.status = '2' </select>
+        AS orderNum AS averageTime FROM master_order mo WHERE mo.chief_id = #{chiefId} AND mo.status
+        = '2' </select>
 
     <!-- 查询近30天订单历史 -->
     <select id="getOrderHistory" resultType="com.ruoyi.pda.domain.VO.OrderHistory"> SELECT
@@ -67,4 +67,35 @@
     <!-- 插入厨师信息 -->
     <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role, join_time)
         VALUES (#{userId}, #{realName}, '0', '107', NOW()) </insert>
+
+    <!-- 获取预约时间里可用的厨师信息 -->
+    <select id="getChefs" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT mc.chief_id AS id,
+        mc.real_name AS name, su.avatar as avatar, (SELECT COALESCE(AVG(mcm2.rating), 0) FROM
+        master_order mo2 LEFT JOIN master_comment mcm2 ON mo2.comment_id = mcm2.comment_id WHERE
+        mo2.chief_id = mc.chief_id) AS rating, COUNT(mo.order_id) AS orderCount FROM master_chief mc
+        LEFT JOIN sys_user su ON mc.user_id = su.user_id LEFT JOIN master_order mo ON mo.chief_id =
+        mc.chief_id AND mo.status IN ('-1', '1') <!-- 待支付或待取餐 --> AND mo.order_time BETWEEN
+        DATE_SUB(#{appointmentTime}, INTERVAL 30 MINUTE) AND DATE_ADD(#{appointmentTime}, INTERVAL
+        30 MINUTE) WHERE mc.status = '0' <!-- 状态正常的厨师 --> GROUP BY mc.chief_id, mc.real_name, su.avatar HAVING
+        COUNT(mo.order_id) &lt; 10 ORDER BY COUNT(mo.order_id), rating DESC </select>
+
+    <!-- getNewOrders -->
+    <select id="getNewOrders" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
+        orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status, mo.create_time
+        as createTime, mo.order_time as orderTime, su.user_name as userName, mo.comment_id as
+        commentId, mo.remark as remark, moi.dish_id as dishId, moi.dish_name as dishName,
+        moi.quantity, moi.price as itemPrice, moi.dish_image_url as dishImageUrl FROM master_order
+        mo LEFT JOIN master_order_item moi ON mo.order_id = moi.order_id LEFT JOIN sys_user su ON
+        mo.user_id = su.user_id WHERE mo.status = -1 ORDER BY mo.create_time DESC </select>
+
+    <!-- getMyPendingOrders -->
+    <select id="getMyPendingOrders" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id
+        as orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status,
+        mo.create_time as createTime, mo.order_time as orderTime, su.user_name as userName,
+        mo.comment_id as commentId, mo.remark as remark, moi.dish_id as dishId, moi.dish_name as
+        dishName, moi.quantity, moi.price as itemPrice, moi.dish_image_url as dishImageUrl FROM
+        master_order mo LEFT JOIN master_order_item moi ON mo.order_id = moi.order_id LEFT JOIN
+        sys_user su ON mo.user_id = su.user_id WHERE mo.chief_id = (SELECT chief_id FROM
+        master_chief WHERE user_id = #{userId}) AND mo.status = #{status} ORDER BY mo.create_time
+        DESC </select>
 </mapper>

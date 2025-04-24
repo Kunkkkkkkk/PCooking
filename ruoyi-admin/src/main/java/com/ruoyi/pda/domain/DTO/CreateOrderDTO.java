@@ -11,9 +11,17 @@ public class CreateOrderDTO {
     private LocalDateTime createTime;
     private LocalDateTime orderTime;
     private String remark;
+    private Long chiefId;
     private String lackMaterial;
     private List<OrderItemDTO> orderItems;
 
+    public Long getChiefId() {
+        return chiefId;
+    }
+
+    public void setChiefId(Long chiefId) {
+        this.chiefId = chiefId;
+    }
     public Long getUserId() {
         return userId;
     }

@@ -1,7 +1,10 @@
 package com.ruoyi.web.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.pda.domain.Comment;
 import com.ruoyi.pda.domain.Order;
 import com.ruoyi.pda.domain.DTO.CreateOrderDTO;
+import com.ruoyi.pda.domain.DTO.OrderCommentDTO;
 import com.ruoyi.pda.domain.DTO.OrderItem;
 import com.ruoyi.pda.domain.DTO.OrderQuery;
 import com.ruoyi.pda.domain.VO.OrderVO;
@@ -26,7 +31,7 @@ public class OrderServiceImpl implements OrderService {
     
     @Autowired
     private OrderMapper orderMapper;
-    
+
     @Autowired
     private OrderItemMapper orderItemMapper;
     
@@ -71,6 +76,7 @@ public class OrderServiceImpl implements OrderService {
         // 创建主订单
         Order order = new Order();
         order.setUserId(createOrderDTO.getUserId());
+        order.setChiefId(createOrderDTO.getChiefId());
         order.setPrice(createOrderDTO.getPrice());
         order.setStatus(createOrderDTO.getStatus());
         order.setCreateTime(LocalDateTime.now());
@@ -106,7 +112,13 @@ public class OrderServiceImpl implements OrderService {
         try {
             Order order = new Order();
             order.setOrderId(orderId);
-            order.setStatus("0"); // 更新为待接单状态
+            int a = orderMapper.isChosenChef(orderId);
+            if (a > 0) {
+                order.setStatus("-3"); // 更新为待炒状态
+            }else {
+                order.setStatus("0"); // 更新为待接单状态
+            }
+
             
             // 记录支付时间，可以根据需求添加
             // 记录支付方式，可以根据需求添加
@@ -144,6 +156,58 @@ public class OrderServiceImpl implements OrderService {
             // 记录日志但不抛出异常
             log.error("取消超时未支付订单失败", e);
         }
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void insertComment(OrderCommentDTO orderCommentDTO) {
+        String[] strings = orderCommentDTO.getDishIds().split(",");
+        Long userId = SecurityUtils.getUserId();
+        long commentId = 0;
+        for (String dishId : strings) {
+            orderMapper.insertComment(orderCommentDTO,dishId);
+        }
+        commentId = orderCommentDTO.getCommentId();
+        orderMapper.updateOrderCommentId(orderCommentDTO.getOrderId(), commentId);
+    }
+
+    @Override
+    public List<OrderVO> getOrderList(String status, Long chiefId) {
+        // 构建查询参数
+        Map<String, Object> params = new HashMap<>();
+        List<OrderVO> orderList = new ArrayList<>();
+            // 查询指定厨师的订单
+        params.put("chiefId", chiefId);
+        params.put("status", status);
+        orderList = orderMapper.getOrderList(params);
+        if (orderList != null && !orderList.isEmpty()) {
+            for (OrderVO orderVO : orderList) {
+                // 查询订单项
+                List<OrderItem> orderItems = orderItemMapper.selectByOrderId(orderVO.getOrderId());
+                orderVO.setOrderItems(orderItems);
+            }
+        }
+        // 调用Mapper方法查询
+        return orderList;
+    }
+
+    @Override
+    public void accept(long orderId,long chiefId) {
+        orderMapper.accept(orderId,chiefId);
+    }
+
+    @Override
+    public void cookComplete(long orderId) {
+        orderMapper.cookComplete(orderId);
+    }
+    @Override
+    public void takeout(long orderId) {
+        orderMapper.takeout(orderId);
+    }
+
+    @Override
+    public OrderVO getCurrentOrder() {
+        Long userId = SecurityUtils.getUserId();
+        return orderMapper.getCurrentOrder(userId);
     }
 }
 

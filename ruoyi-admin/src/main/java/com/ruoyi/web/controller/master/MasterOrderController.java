@@ -18,8 +18,10 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.pda.domain.Comment;
 import com.ruoyi.pda.domain.DTO.CreateOrderDTO;
+import com.ruoyi.pda.domain.DTO.OrderCommentDTO;
 import com.ruoyi.pda.domain.DTO.OrderQuery;
 import com.ruoyi.pda.domain.VO.OrderVO;
+import com.ruoyi.web.controller.tool.PicgoUpload;
 import com.ruoyi.web.service.OrderService;
 
 @RestController
@@ -29,6 +31,8 @@ public class MasterOrderController extends BaseController {
     @GetMapping("/master/order/pageList")
     public TableDataInfo pageList(OrderQuery orderQuery) {
         startPage();
+        long userId = SecurityUtils.getUserId();
+        orderQuery.setUserId(userId);
         List<OrderVO> list = orderService.getList(orderQuery);
         return getDataTable(list);
     }
@@ -39,7 +43,7 @@ public class MasterOrderController extends BaseController {
         ajax.put("data", orderService.getDetail(orderId));
         return ajax;
     }
-    //查看订单绑定的用户信息
+    //查看订单的用户评价
     @GetMapping("/master/order/review")
     public AjaxResult review(@RequestParam("orderId") long orderId) {
         AjaxResult ajax = AjaxResult.success();
@@ -50,6 +54,16 @@ public class MasterOrderController extends BaseController {
         ajax.put("data", comment);
         return ajax;
     }
+    //已完成订单写评价
+    @PostMapping("/master/order/review")
+    public AjaxResult review(@RequestBody OrderCommentDTO orderCommentDTO) throws Exception {
+        AjaxResult ajax = AjaxResult.success();
+        //上传图片
+        String images = PicgoUpload.uploadByPicgo(orderCommentDTO.getImageUrlsList());
+        orderCommentDTO.setImagesUrls(images);
+        orderService.insertComment(orderCommentDTO);
+    return ajax;}
+
     // 创建订单
     @PostMapping("/master/order/create")
     public AjaxResult createOrder(@RequestBody CreateOrderDTO createOrderDTO) {
@@ -97,4 +111,15 @@ public class MasterOrderController extends BaseController {
             return AjaxResult.error("取消订单失败，请重试");
         }
     }
+
+    @GetMapping("/master/order/current")
+    public AjaxResult getCurrentOrder() {
+        AjaxResult ajax = AjaxResult.success();
+        OrderVO order = orderService.getCurrentOrder();
+        ajax.put("data", order);
+        return ajax;
+    }
+    
+
+
 }

@@ -1,10 +1,12 @@
 package com.ruoyi.web.controller.master;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,20 +15,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
 import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import com.ruoyi.pda.domain.DTO.ChiefDTO;
 import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
 import com.ruoyi.pda.domain.VO.ChiefVO;
+import com.ruoyi.pda.domain.VO.OrderVO;
 import com.ruoyi.web.service.ChiefService;
+import com.ruoyi.web.service.OrderService;
 
 @RestController
 @RequestMapping("/master") // 添加统一的路径前缀
 public class MasterChiefController extends BaseController {
     @Autowired
     private ChiefService chiefService;
+    @Autowired
+    private OrderService orderService;
     //厨师查询
     @GetMapping("/chief/pageList")
     public TableDataInfo pageList(ChiefQuery chiefQuery) {
@@ -40,7 +48,7 @@ public class MasterChiefController extends BaseController {
         chiefService.editChief(chiefDTO);
         return AjaxResult.success();
     }
-    //绩效查询：1.总订单数 2.平均制作时间
+    //绩效查询：1.总订单数（status为2的已完成的）  2.总钱数（status为2的已完成的） 3.星级（status为2且有评价的，评价的打分的平均值）4.近30天订单数（status为2且finish_time在30天内的）和近30天的营业额（status为2且create_time在30天内的）
     @GetMapping("/chief/getPerformanceData")
     public AjaxResult getPerformanceData(@RequestParam long chiefId) {
         ChiefVO chiefVO = chiefService.getPerformance(chiefId);
@@ -116,4 +124,89 @@ public class MasterChiefController extends BaseController {
             return AjaxResult.error("拒绝操作失败，请联系管理员");
         }
     }
+
+    /**
+     * 获取预约时间里可用的厨师信息
+     */
+    @GetMapping("/chief/listNotBusy")
+    public AjaxResult getChefs(@RequestParam(value = "appointmentTime", required = true) String appointmentTime) {
+        try {
+            List<ChiefVO> chefs = chiefService.getChefs(appointmentTime);
+            return AjaxResult.success(chefs);
+        } catch (Exception e) {
+            return AjaxResult.error("获取厨师列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取新订单列表
+     */
+    @GetMapping("/chief/orders/new")
+    public AjaxResult getNewOrders() {
+        List<OrderVO> orders = chiefService.getNewOrders();
+        return AjaxResult.success(orders);
+    }
+    /**
+     * 获取我的订单列表
+     */
+    @GetMapping("/chief/orders/my")
+    public AjaxResult getMyPendingOrders(@RequestParam String status) {
+        Long userId = SecurityUtils.getUserId();
+        List<OrderVO> orders = chiefService.getMyPendingOrders(userId, status);
+        return AjaxResult.success(orders);
+    }
+    
+    /**
+     * 获取订单列表
+     */
+    @GetMapping("/chief/orders/list")
+    public TableDataInfo getOrderList(@RequestParam(value = "status", required = false) String status, 
+                                      @RequestParam(value = "type", required = false) String type) {
+        startPage();
+        LoginUser loginUser = getLoginUser();
+        List<OrderVO> list = new ArrayList<>();
+        
+        try {
+            // type=new 查询新订单（待接单状态）
+            if ("new".equals(type)) {
+                list = orderService.getOrderList(status, null);
+            } 
+            // type=my 查询我的订单（根据状态）
+            else if ("my".equals(type)) {
+                Long userId = loginUser.getUserId();
+                ChiefVO chief = chiefService.findChiefByUserId(userId);
+                if (chief != null) {
+                    list = orderService.getOrderList(status, chief.getId());
+                }
+            }
+            return getDataTable(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return getDataTable(list);
+        }
+    }
+
+    @PostMapping("chief/orders/accept/{orderId}")
+    public AjaxResult accept(@PathVariable Long orderId) {
+        AjaxResult ajax = AjaxResult.success();
+        long userId = SecurityUtils.getUserId();
+        ChiefVO chief = chiefService.findChiefByUserId(userId);
+        orderService.accept(orderId, chief.getId());
+        return ajax;
+    }
+
+    @PostMapping("chief/cook/{orderId}")
+    public AjaxResult cookComplete(@PathVariable Long orderId) {
+        AjaxResult ajax = AjaxResult.success();
+        orderService.cookComplete(orderId);
+        return ajax;
+    }
+
+    @PostMapping("chief/takeout/{orderId}")
+    public AjaxResult takeout(@PathVariable Long orderId) {
+        AjaxResult ajax = AjaxResult.success();
+        orderService.takeout(orderId);
+        return ajax;
+    }
+
 }

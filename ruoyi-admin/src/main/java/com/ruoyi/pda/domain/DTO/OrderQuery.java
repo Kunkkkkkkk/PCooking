@@ -14,4 +14,5 @@ public class OrderQuery{
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;   // 结束时间
     private String status;
+    private long userId;
 }

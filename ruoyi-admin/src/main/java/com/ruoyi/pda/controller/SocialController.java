@@ -6,18 +6,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.ruoyi.common.core.domain.model.LoginUser;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.gson.Gson;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -25,7 +32,11 @@ import com.ruoyi.pda.domain.Social;
 import com.ruoyi.pda.domain.SocialComment;
 import com.ruoyi.pda.domain.SocialLike;
 import com.ruoyi.pda.service.ISocialService;
-import org.springframework.web.multipart.MultipartFile;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * 社交内容 控制层
@@ -190,12 +201,19 @@ public class SocialController extends BaseController
      * 获取前端所需的社交内容列表(无需权限)
      */
     @GetMapping("/frontlist")
-    public AjaxResult frontList()
+    public AjaxResult frontList(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size)
     {
         Social social = new Social();
         social.setStatus("0"); // 只查询正常状态的
+        PageHelper.startPage(page, size);
         List<Social> list = socialService.selectSocialList(social);
-        return success(list);
+        PageInfo<Social> pageInfo = new PageInfo<>(list);
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", list);
+        result.put("current", pageInfo.getPageNum());
+        result.put("pages", pageInfo.getPages());
+        result.put("total", pageInfo.getTotal());
+        return success(result);
     }
 
     /**

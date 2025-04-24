@@ -1,9 +1,11 @@
 package com.ruoyi.pda.domain.VO;
 
-import lombok.Data;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+
+import lombok.Data;
 
 @Data
 public class ChiefVO {
@@ -11,11 +13,23 @@ public class ChiefVO {
     private String name;
     private String phone;
     private long role;
-    private double rating;
+    private double rating; // 平均评分
     private String status;
     private String role_name;
     private LocalDateTime joinTime;
-    private int orderNum;
+    private int orderNum; // 总完成订单数
     private double averageTime;
-    private List<OrderHistory> orderHistory; // 近30天订单历史
+    private String avatar;
+
+    // --- 新增绩效统计字段 ---
+    private BigDecimal totalRevenue; // 总营业额 (使用 BigDecimal 保证精度)
+    private int ordersLast30Days; // 近30天订单数
+    private BigDecimal revenueLast30Days; // 近30天营业额
+
+    // --- 图表数据 ---
+    // Map<String, Integer> String 是日期 (YYYY-MM-DD), Integer 是订单数
+    private Map<String, Integer> dailyOrderCounts; // 近30天每日订单数
+
+    // 保留 orderHistory 但修改注释，如果其他地方仍在使用
+    private List<OrderHistory> orderHistory; // 订单历史记录 (具体用途待确认)
 }

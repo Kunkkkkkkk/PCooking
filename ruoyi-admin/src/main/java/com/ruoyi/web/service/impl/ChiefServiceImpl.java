@@ -15,6 +15,7 @@ import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
 import com.ruoyi.pda.domain.VO.ChiefVO;
 import com.ruoyi.pda.domain.VO.OrderHistory;
+import com.ruoyi.pda.domain.VO.OrderVO;
 import com.ruoyi.web.mapper.ChiefMapper;
 import com.ruoyi.web.service.ChiefService;
 
@@ -154,5 +155,28 @@ public class ChiefServiceImpl implements ChiefService {
         }
         
         return updateResult > 0;
+    }
+
+    @Override
+    public List<ChiefVO> getChefs(String appointmentTime) {
+
+        return chiefMapper.getChefs(appointmentTime);
+        // return chiefMapper.getChefsWithHistoricalRating(appointmentTime);
+    }
+
+    @Override
+    public List<OrderVO> getNewOrders() {
+        return null;
+    }
+
+    @Override
+    public List<OrderVO> getMyPendingOrders(Long userId, String status) {
+        return null;
+    }
+
+
+    @Override
+    public ChiefVO findChiefByUserId(Long userId) {
+        return chiefMapper.findChiefByUserId(userId);
     }
 }

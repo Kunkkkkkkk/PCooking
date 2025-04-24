@@ -20,13 +20,20 @@ public class OrderVO {
     private String chiefName;
     private String userName;
     private String remark;
-    
+    private String userAvatar; 
     // 厨师真实姓名
     private String chiefRealName;
-    
+    private LocalDateTime cookedTime;
     // 厨师头像
     private String chiefAvatar;
-    
+
+
+    public void setCookedTime(LocalDateTime cookedTime) {
+        this.cookedTime = cookedTime;
+    }
+    public LocalDateTime getCookedTime() {
+        return cookedTime;
+    }
     // 订单项列表
     private List<OrderItem> orderItems;
 
@@ -140,5 +147,13 @@ public class OrderVO {
 
     public void setChiefAvatar(String chiefAvatar) {
         this.chiefAvatar = chiefAvatar;
+    }
+
+    public String getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(String userAvatar) {
+        this.userAvatar = userAvatar;
     }
 }
