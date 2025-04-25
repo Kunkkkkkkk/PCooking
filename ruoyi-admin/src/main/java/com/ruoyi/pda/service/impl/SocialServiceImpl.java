@@ -50,6 +50,19 @@ public class SocialServiceImpl implements ISocialService
     }
 
     /**
+     * 查询社交内容列表
+     *
+     * @param social 社交内容信息
+     * @return 社交内容
+     */
+    @Override
+    public List<Social> selectSocialList2(Social social)
+    {
+        return socialMapper.selectSocialListWithStatus(social);
+    }
+
+
+    /**
      * 查询社交内容信息
      * 
      * @param socialId 社交内容ID

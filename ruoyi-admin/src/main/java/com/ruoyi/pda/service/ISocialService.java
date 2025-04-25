@@ -20,6 +20,8 @@ public interface ISocialService
      */
     public List<Social> selectSocialList(Social social);
 
+
+    public List<Social> selectSocialList2(Social social);
     /**
      * 查询社交内容信息
      * 

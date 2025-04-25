@@ -91,4 +91,6 @@ public interface SocialCommentMapper
      * @return 评论数量
      */
     public int countSocialComment(Long socialId);
-} 
+
+    List<SocialComment> SocialCommentLists(String contentQuery);
+}

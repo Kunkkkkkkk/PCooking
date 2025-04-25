@@ -54,6 +54,16 @@ public class SocialComment extends BaseEntity
     /** 关联的社交内容 */
     private Social social;
 
+    private String queryContent;
+
+    public String getQueryContent() {
+        return queryContent;
+    }
+
+    public void setQueryContent(String queryContent) {
+        this.queryContent = queryContent;
+    }
+
     public Long getCommentId()
     {
         return commentId;

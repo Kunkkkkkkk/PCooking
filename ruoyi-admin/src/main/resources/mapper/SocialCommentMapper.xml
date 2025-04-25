@@ -45,6 +45,17 @@
     <select id="countSocialComment" parameterType="Long" resultType="int"> select count(*) from
         master_social_comment where social_id = #{socialId} and status = '0' </select>
 
+
+    <select id="SocialCommentLists" parameterType="com.ruoyi.pda.domain.SocialComment"
+            resultMap="SocialCommentResult">
+        <include refid="selectSocialCommentVo" />
+        <where> c.status = '0'
+            <if test="queryContent != null"> AND c.content like concat('%', #{contentQuery}, '%') </if>
+
+        </where>
+        order by c.create_time desc </select>
+
+
     <insert id="insertSocialComment" parameterType="com.ruoyi.pda.domain.SocialComment"
         useGeneratedKeys="true" keyProperty="commentId"> insert into master_social_comment (
         social_id, user_id, content, parent_id, status, create_time ) values ( #{socialId},

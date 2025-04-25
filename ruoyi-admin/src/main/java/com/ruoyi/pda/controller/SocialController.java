@@ -58,6 +58,16 @@ public class SocialController extends BaseController
         List<Social> list = socialService.selectSocialList(social);
         return getDataTable(list);
     }
+    /**
+     * 后台查询社交内容列表
+     */
+    @GetMapping("/list2")
+    public TableDataInfo list2(Social social)
+    {
+        startPage();
+        List<Social> list = socialService.selectSocialList2(social);
+        return getDataTable(list);
+    }
 
     /**
      * 获取社交内容详细信息

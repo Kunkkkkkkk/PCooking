@@ -43,6 +43,15 @@ public class SocialCommentController extends BaseController
     }
 
     /**
+     * 后台查看所有评论
+     */
+    @GetMapping("/list2")
+    public TableDataInfo list2( SocialComment socialComment){
+        startPage();
+        List<SocialComment> list = socialCommentService.SocialCommentList(socialComment.getQueryContent());
+        return getDataTable(list);
+    }
+    /**
      * 根据社交内容ID查询评论列表
      */
     @GetMapping("/bySocial/{socialId}")

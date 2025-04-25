@@ -13,6 +13,7 @@
         <result property="updateTime" column="update_time" />
         <result property="likeCount" column="like_count" />
         <result property="commentCount" column="comment_count" />
+        <result property="userName" column="user_name" />
         <association property="user" javaType="com.ruoyi.common.core.domain.entity.SysUser">
             <id property="userId" column="user_id" />
             <result property="nickName" column="nick_name" />
@@ -23,8 +24,8 @@
     <sql id="selectSocialVo"> select s.social_id, s.user_id, s.content, s.image_url, s.image_height,
         s.tags, s.status, s.create_time, s.update_time, (select count(*) from master_social_like l
         where l.social_id = s.social_id) as like_count, (select count(*) from master_social_comment
-        c where c.social_id = s.social_id and c.status = '0') as comment_count, u.nick_name,
-        u.avatar from master_social s left join sys_user u on s.user_id = u.user_id </sql>
+        c where c.social_id = s.social_id and c.status = '0') as comment_count, u.avatar,
+        u.user_name from master_social s left join sys_user u on s.user_id = u.user_id </sql>
 
     <select id="selectSocialList" parameterType="com.ruoyi.pda.domain.Social"
         resultMap="SocialResult">
@@ -42,6 +43,22 @@
 
     <select id="checkSocialLikedByUser" resultType="Integer"> select count(1) from
         master_social_like where social_id = #{socialId} and user_id = #{userId} </select>
+
+    <select id="selectSocialListWithStatus" parameterType="com.ruoyi.pda.domain.Social"
+            resultMap="SocialResult">
+        <include refid="selectSocialVo" />
+
+        <where> 1=1
+            <if test="status!=null and status!=''">
+               AND s.status = #{status}
+            </if>
+         <if test="userId != null"> AND
+            s.user_id = #{userId} </if>
+            <if test="content != null and content != ''"> AND s.content like
+                concat('%', #{content}, '%') </if>
+            <if test="tags != null and tags != ''"> AND s.tags like
+                concat('%', #{tags}, '%') </if>
+        </where> order by s.create_time desc </select>
 
     <insert id="insertSocial" parameterType="com.ruoyi.pda.domain.Social" useGeneratedKeys="true"
         keyProperty="socialId"> insert into master_social ( user_id, content, image_url,

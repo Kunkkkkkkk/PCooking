@@ -21,6 +21,9 @@ public interface SocialMapper
      */
     public List<Social> selectSocialList(Social social);
 
+
+
+    public List<Social> selectSocialListWithStatus(Social social);
     /**
      * 查询社交内容信息
      * 

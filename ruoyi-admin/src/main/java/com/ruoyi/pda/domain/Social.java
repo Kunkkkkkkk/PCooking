@@ -26,6 +26,7 @@ public class Social extends BaseEntity
     @Excel(name = "用户ID")
     private Long userId;
 
+    private String userName;
     /** 社交内容 */
     @Excel(name = "社交内容")
     private String content;
@@ -68,10 +69,16 @@ public class Social extends BaseEntity
     
     /** 社交内容标签列表 */
     private List<String> tagList;
-    
+
     /** 评论列表 */
     private List<SocialComment> comments;
 
+    public void setUserName(String userName){
+        this.userName = userName;
+    }
+    public String getUserName(){
+        return userName;
+    }
     public void setSocialId(Long socialId) 
     {
         this.socialId = socialId;

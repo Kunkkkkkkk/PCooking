@@ -82,4 +82,6 @@ public interface ISocialCommentService
      * @return 评论数量
      */
     public int countSocialComment(Long socialId);
+
+    List<SocialComment> SocialCommentList(String contentQuery);
 } 

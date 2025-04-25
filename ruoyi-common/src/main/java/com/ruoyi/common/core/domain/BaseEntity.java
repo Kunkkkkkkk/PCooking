@@ -17,6 +17,22 @@ public class BaseEntity implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
+    private int pageNum;
+    private int pageSize;
+    private int total;
+
+    public int getPageNum() {
+        return pageNum;
+    }
+    public void setPageNum(int pageNum) {
+        this.pageNum = pageNum;
+    }
+    public int getPageSize() {
+        return pageSize;
+    }
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
     /** 搜索值 */
     @JsonIgnore
     private String searchValue;

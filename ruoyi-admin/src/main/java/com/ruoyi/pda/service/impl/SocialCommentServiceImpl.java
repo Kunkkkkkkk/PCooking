@@ -130,4 +130,9 @@ public class SocialCommentServiceImpl implements ISocialCommentService
     {
         return socialCommentMapper.countSocialComment(socialId);
     }
-} 
+
+    @Override
+    public List<SocialComment> SocialCommentList(String contentQuery) {
+        return socialCommentMapper.SocialCommentLists(contentQuery);
+    }
+}
