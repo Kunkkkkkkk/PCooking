@@ -1,5 +1,6 @@
 package com.ruoyi.web.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,17 +68,16 @@ public class ChiefServiceImpl implements ChiefService {
         }
 
         ChiefAuth chiefAuth = new ChiefAuth();
-        // 以下 setter 调用可能因 ChiefAuth 实体类未更新而报错，暂时注释
-        // chiefAuth.setUserId(userId);
-        // chiefAuth.setRealName(applyDTO.getRealName());
-        // chiefAuth.setIdCode(applyDTO.getIdCode());
-        // chiefAuth.setLinkPhone(applyDTO.getPhone());
-        // chiefAuth.setYears(applyDTO.getYears());
-        // chiefAuth.setCuisine(applyDTO.getCuisine());
-        // chiefAuth.setImage(applyDTO.getImage());
-        // chiefAuth.setRemark(applyDTO.getRemark());
-        // chiefAuth.setStatus("0"); // 默认待审核
-        // chiefAuth.setRequestTime(LocalDateTime.now());
+         chiefAuth.setUserId(userId);
+         chiefAuth.setRealName(applyDTO.getRealName());
+         chiefAuth.setIdCode(applyDTO.getIdCode());
+         chiefAuth.setLinkPhone(applyDTO.getPhone());
+         chiefAuth.setYears(applyDTO.getYears());
+         chiefAuth.setCuisine(applyDTO.getCuisine());
+         chiefAuth.setImage(applyDTO.getImage());
+         chiefAuth.setRemark(applyDTO.getRemark());
+         chiefAuth.setStatus("0"); // 默认待审核
+         chiefAuth.setRequestTime(LocalDateTime.now());
         
         int result = chiefMapper.insertChiefAuth(chiefAuth);
         return result > 0;
