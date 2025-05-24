@@ -87,13 +87,16 @@
         orderId,chief_id as chiefId,user_id as userId,price,status,create_time as
         createTime,order_time as orderTime,remark FROM master_order WHERE status not in ('-2','2')
         AND user_id=#{userId} ORDER BY create_time DESC LIMIT 1 </select>
-    <select id="getList2" resultType="com.ruoyi.pda.domain.VO.OrderVO">
-        SELECT mo.order_id as orderId,su.user_name as userName,mo.price as price,mo.create_time as createTime,mo.status as status from master_order mo left join sys_user su on mo.user_id =su.user_id
-        <where> 1=1
-            <if test="userName!=null and userName !=''">AND su.user_name LIKE CONCAT('%', #{userName}, '%')</if>
-            <if test="beginTime!=null">AND mo.create_time BETWEEN #{beginTime} AND #{endTime}</if>
-            <if test="status!=null and status!=''">AND mo.status =#{status}</if>
+    <select id="getList2" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
+        orderId, su.user_name as userName, mo.price as price, mo.create_time as createTime,
+        mo.status as status from master_order mo left join sys_user su on mo.user_id = su.user_id <where>
+        1=1 <if test="userName != null and userName != ''"> AND su.user_name LIKE CONCAT('%',
+        #{userName}, '%') </if>
+        <if test="beginTime != null"> AND mo.create_time &gt;= #{beginTime} </if>
+        <if
+                test="endTime != null"> AND mo.create_time &lt;= #{endTime} </if>
+        <if
+                test="status != null and status != ''"> AND mo.status = #{status} </if>
         </where>
-        order by mo.create_time desc
-    </select>
+        order by mo.create_time desc </select>
 </mapper>

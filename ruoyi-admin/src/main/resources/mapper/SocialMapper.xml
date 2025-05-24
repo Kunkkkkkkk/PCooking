@@ -21,22 +21,28 @@
         </association>
     </resultMap>
 
-    <sql id="selectSocialVo"> select s.social_id, s.user_id, s.content, s.image_url, s.image_height,
-        s.tags, s.status, s.create_time, s.update_time, (select count(*) from master_social_like l
-        where l.social_id = s.social_id) as like_count, (select count(*) from master_social_comment
-        c where c.social_id = s.social_id and c.status = '0') as comment_count, u.avatar,
-        u.user_name from master_social s left join sys_user u on s.user_id = u.user_id </sql>
+    <sql id="selectSocialVo"> SELECT s.social_id, s.user_id, s.content, s.image_url, s.image_height,
+        s.tags, s.status, s.create_time, s.update_time, COUNT(DISTINCT l.like_id) as like_count,
+        COUNT(DISTINCT c.comment_id) as comment_count, u.avatar, u.nick_name, u.user_name FROM
+        master_social s LEFT JOIN sys_user u ON s.user_id = u.user_id LEFT JOIN master_social_like l
+        ON s.social_id = l.social_id LEFT JOIN master_social_comment c ON s.social_id = c.social_id
+        AND c.status = '0' </sql>
 
     <select id="selectSocialList" parameterType="com.ruoyi.pda.domain.Social"
-        resultMap="SocialResult">
-        <include refid="selectSocialVo" />
-        <where> s.status = '0' <if test="userId != null"> AND
-        s.user_id = #{userId} </if>
-            <if test="content != null and content != ''"> AND s.content like
-        concat('%', #{content}, '%') </if>
-            <if test="tags != null and tags != ''"> AND s.tags like
-        concat('%', #{tags}, '%') </if>
-        </where> order by s.create_time desc </select>
+        resultMap="SocialResult"> SELECT * FROM ( <include refid="selectSocialVo" />
+            <where> s.status
+        = '0' <if test="userId != null">AND s.user_id = #{userId}</if>
+                <if
+                test="content != null and content != ''">AND s.content like concat('%', #{content},
+        '%')</if>
+                <if test="tags != null and tags != ''">AND s.tags like concat('%', #{tags}, '%')</if>
+        </where>
+        GROUP BY s.social_id, s.user_id, s.content, s.image_url, s.image_height, s.tags, s.status,
+        s.create_time, s.update_time, u.avatar, u.nick_name, u.user_name ) t <choose>
+            <when test="type == 1">ORDER BY t.like_count DESC, t.create_time DESC</when>
+            <otherwise>ORDER BY t.create_time DESC</otherwise>
+        </choose>
+    </select>
 
     <select id="selectSocialById" parameterType="Long" resultMap="SocialResult">
         <include refid="selectSocialVo" /> where s.social_id = #{socialId} and s.status = '0' </select>
@@ -45,20 +51,19 @@
         master_social_like where social_id = #{socialId} and user_id = #{userId} </select>
 
     <select id="selectSocialListWithStatus" parameterType="com.ruoyi.pda.domain.Social"
-            resultMap="SocialResult">
-        <include refid="selectSocialVo" />
-
-        <where> 1=1
-            <if test="status!=null and status!=''">
-               AND s.status = #{status}
-            </if>
-         <if test="userId != null"> AND
-            s.user_id = #{userId} </if>
-            <if test="content != null and content != ''"> AND s.content like
-                concat('%', #{content}, '%') </if>
-            <if test="tags != null and tags != ''"> AND s.tags like
-                concat('%', #{tags}, '%') </if>
-        </where> order by s.create_time desc </select>
+        resultMap="SocialResult"> SELECT * FROM ( <include refid="selectSocialVo" />
+            <where> 1=1 <if
+                test="status!=null and status!=''">AND s.status = #{status}</if>
+                <if
+                test="userId != null">AND s.user_id = #{userId}</if>
+                <if
+                test="content != null and content != ''">AND s.content like concat('%', #{content},
+        '%')</if>
+                <if test="tags != null and tags != ''">AND s.tags like concat('%', #{tags}, '%')</if>
+        </where>
+        GROUP BY s.social_id, s.user_id, s.content, s.image_url, s.image_height, s.tags, s.status,
+        s.create_time, s.update_time, u.avatar, u.nick_name, u.user_name ) t ORDER BY t.create_time
+        DESC </select>
 
     <insert id="insertSocial" parameterType="com.ruoyi.pda.domain.Social" useGeneratedKeys="true"
         keyProperty="socialId"> insert into master_social ( user_id, content, image_url,

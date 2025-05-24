@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.mapper.DashboardMapper">
+
+    <!-- 获取订单统计数据 -->
+    <select id="getOrderStats" resultType="java.util.Map"> SELECT COUNT(CASE WHEN status != '-2'
+        THEN 1 END) as totalOrders, COUNT(CASE WHEN DATE(create_time) = CURDATE() AND status != '-2'
+        THEN 1 END) as todayOrders, COALESCE(SUM(CASE WHEN status != '-2' THEN price ELSE 0 END), 0)
+        as totalRevenue, COALESCE(SUM(CASE WHEN DATE(create_time) = CURDATE() AND status != '-2'
+        THEN price ELSE 0 END), 0) as todayRevenue, COUNT(CASE WHEN status != '-2' AND create_time
+        BETWEEN CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+        WHEN #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} =
+        'month' THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN
+        #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN
+        ('week', 'month') THEN NOW() ELSE #{endDate} END THEN 1 END) as currentOrders, COUNT(CASE
+        WHEN status != '-2' AND create_time BETWEEN CASE WHEN #{timeRange} = 'today' THEN
+        DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 00:00:00') WHEN #{timeRange} =
+        'week' THEN DATE_SUB(CURDATE(), INTERVAL 14 DAY) WHEN #{timeRange} = 'month' THEN
+        DATE_SUB(CURDATE(), INTERVAL 60 DAY) ELSE DATE_SUB(#{startDate}, INTERVAL 30 DAY) END AND
+        CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY),
+        '%Y-%m-%d 23:59:59') WHEN #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        WHEN #{timeRange} = 'month' THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE
+        DATE_SUB(#{endDate}, INTERVAL 30 DAY) END THEN 1 END) as previousOrders, COALESCE(SUM(CASE
+        WHEN status != '-2' AND create_time BETWEEN CASE WHEN #{timeRange} = 'today' THEN
+        DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN #{timeRange} = 'week' THEN
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month' THEN DATE_SUB(CURDATE(),
+        INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} = 'today' THEN
+        DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week', 'month') THEN
+        NOW() ELSE #{endDate} END THEN price ELSE 0 END), 0) as currentRevenue, COALESCE(SUM(CASE
+        WHEN status != '-2' AND create_time BETWEEN CASE WHEN #{timeRange} = 'today' THEN
+        DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 00:00:00') WHEN #{timeRange} =
+        'week' THEN DATE_SUB(CURDATE(), INTERVAL 14 DAY) WHEN #{timeRange} = 'month' THEN
+        DATE_SUB(CURDATE(), INTERVAL 60 DAY) ELSE DATE_SUB(#{startDate}, INTERVAL 30 DAY) END AND
+        CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY),
+        '%Y-%m-%d 23:59:59') WHEN #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        WHEN #{timeRange} = 'month' THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE
+        DATE_SUB(#{endDate}, INTERVAL 30 DAY) END THEN price ELSE 0 END), 0) as previousRevenue FROM
+        master_order </select>
+
+    <!-- 获取用户统计数据 -->
+    <select id="getUserStats" resultType="java.util.Map"> SELECT COUNT(*) as totalUsers, COUNT(CASE
+        WHEN DATE(create_time) = CURDATE() THEN 1 END) as newUsers, COUNT(CASE WHEN create_time
+        BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW() THEN 1 END) as currentUsers, COUNT(CASE
+        WHEN create_time BETWEEN DATE_SUB(NOW(), INTERVAL 2 MONTH) AND DATE_SUB(NOW(), INTERVAL 1
+        MONTH) THEN 1 END) as previousUsers FROM sys_user WHERE del_flag = '0' </select>
+
+    <!-- 获取厨师统计数据 -->
+    <select id="getChefStats" resultType="java.util.Map"> SELECT (SELECT COUNT(*) FROM master_chief
+        WHERE status = '0') as totalChefs, (SELECT COUNT(*) FROM master_chief_auth WHERE status =
+        '0') as pendingChefs </select>
+
+    <!-- 获取订单趋势数据 -->
+    <select id="getOrderTrend" resultType="java.util.Map"> SELECT DATE(create_time) as date,
+        COUNT(*) as count, COALESCE(SUM(price), 0) as revenue FROM master_order WHERE status != '-2' <if
+            test="timeRange != null and timeRange == 'week'"> AND create_time >= DATE_SUB(CURDATE(),
+        INTERVAL 7 DAY) </if>
+        <if test="timeRange != null and timeRange == 'month'"> AND create_time
+        >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) </if>
+        <if
+            test="startDate != null and endDate != null"> AND create_time BETWEEN #{startDate} AND
+        #{endDate} </if> GROUP BY DATE(create_time) ORDER BY date </select>
+
+    <!-- 获取订单状态分布 -->
+    <select id="getOrderStatusDistribution" resultType="java.util.Map"> SELECT status, COUNT(*) as
+        count FROM master_order GROUP BY status </select>
+
+    <!-- 获取热门菜品排行 -->
+    <select id="getPopularDishes" resultType="java.util.Map"> SELECT d.name, COUNT(oi.dish_id) as
+        orderCount, COALESCE(SUM(oi.price * oi.quantity), 0) as totalRevenue FROM master_order_item
+        oi JOIN master_dishes d ON oi.dish_id = d.dish_id JOIN master_order o ON oi.order_id =
+        o.order_id WHERE o.status != '-2' <if test="timeRange != null and timeRange == 'week'"> AND
+        o.create_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) </if>
+        <if
+            test="timeRange != null and timeRange == 'month'"> AND o.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) </if>
+        <if test="startDate != null and endDate != null">
+        AND o.create_time BETWEEN #{startDate} AND #{endDate} </if> GROUP BY d.dish_id, d.name ORDER
+        BY orderCount DESC LIMIT 10 </select>
+
+    <!-- 获取厨师工作负载 -->
+    <select id="getChefWorkload" resultType="java.util.Map"> SELECT mc.real_name as name,
+        COUNT(mo.order_id) as orderCount, COALESCE(SUM(mo.price), 0) as totalRevenue FROM
+        master_chief mc LEFT JOIN master_order mo ON mc.chief_id = mo.chief_id WHERE mc.status = '0'
+        AND mo.status NOT IN ('-2', '2') <!-- 排除已取消和已完成的订单 --> AND mo.create_time BETWEEN CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN #{timeRange} = 'week' THEN
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month' THEN DATE_SUB(CURDATE(),
+        INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} = 'today' THEN
+        DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week', 'month') THEN
+        NOW() ELSE #{endDate} END GROUP BY mc.chief_id, mc.real_name ORDER BY orderCount DESC </select>
+
+    <!-- 获取订单完成情况 -->
+    <select id="getOrderCompletion" resultType="java.util.Map"> SELECT DATE(create_time) as date,
+        COUNT(CASE WHEN status = '2' THEN 1 END) as completed, COUNT(CASE WHEN status NOT IN ('-2',
+        '2') THEN 1 END) as pending FROM master_order WHERE status != '-2' AND create_time BETWEEN
+        CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN
+        #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month'
+        THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week',
+        'month') THEN NOW() ELSE #{endDate} END GROUP BY DATE(create_time) ORDER BY date </select>
+
+    <!-- 获取高峰时段分析 -->
+    <select id="getPeakHours" resultType="java.util.Map"> SELECT HOUR(create_time) as hour, COUNT(*)
+        as orderCount FROM master_order WHERE status != '-2' AND create_time BETWEEN CASE WHEN
+        #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN #{timeRange} =
+        'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month' THEN
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week',
+        'month') THEN NOW() ELSE #{endDate} END GROUP BY HOUR(create_time) ORDER BY hour </select>
+
+</mapper> 

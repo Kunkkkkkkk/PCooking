@@ -18,7 +18,8 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 public class Social extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
-
+    //最新：1 最热：0
+    private String type;
     /** 社交内容ID */
     private Long socialId;
 
@@ -73,6 +74,12 @@ public class Social extends BaseEntity
     /** 评论列表 */
     private List<SocialComment> comments;
 
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
     public void setUserName(String userName){
         this.userName = userName;
     }

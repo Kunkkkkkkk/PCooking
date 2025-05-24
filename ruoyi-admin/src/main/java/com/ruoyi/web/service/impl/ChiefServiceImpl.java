@@ -1,7 +1,11 @@
 package com.ruoyi.web.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,14 +40,30 @@ public class ChiefServiceImpl implements ChiefService {
 
     @Override
     public ChiefVO getPerformance(long chiefId) {
+        // 获取基础统计数据
         ChiefVO summary = chiefMapper.getPerformanceSummary(chiefId);
         if (summary == null) {
             summary = new ChiefVO();
-            // summary.setOrderNum(0);
-            // summary.setAverageTime(0.0);
+            summary.setOrderNum(0);
+            summary.setTotalRevenue(BigDecimal.ZERO);
+            summary.setRating(0.0);
+            summary.setOrdersLast30Days(0);
+            summary.setRevenueLast30Days(BigDecimal.ZERO);
         }
+
+        // 获取近30天订单历史
         List<OrderHistory> orderHistory = chiefMapper.getOrderHistory(chiefId);
-        // summary.setOrderHistory(orderHistory != null ? orderHistory : new ArrayList<>());
+        if (orderHistory == null) {
+            orderHistory = new ArrayList<>();
+        }
+
+        // 构建每日订单数据Map
+        Map<String, Integer> dailyOrderCounts = new HashMap<>();
+        for (OrderHistory history : orderHistory) {
+            dailyOrderCounts.put(history.getDate(), history.getOrderCount());
+        }
+        summary.setDailyOrderCounts(dailyOrderCounts);
+
         return summary;
     }
     //厨师申请分页查询

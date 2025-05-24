@@ -14,16 +14,21 @@
         </where>
         GROUP BY mu.phonenumber, sd.dict_label,
         mc.role,mc.real_name,mc.status,mc.join_time,mc.chief_id</select>
-    <!-- 查询总数和平均时间 -->
+    <!-- 查询总数和总营业额 -->
     <select id="getPerformanceSummary" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT COUNT(1)
-        AS orderNum AS averageTime FROM master_order mo WHERE mo.chief_id = #{chiefId} AND mo.status
-        = '2' </select>
+        as orderNum, COALESCE(SUM(mo.price), 0) as totalRevenue, ( SELECT COUNT(1) FROM master_order
+        mo2 WHERE mo2.chief_id = #{chiefId} AND mo2.status = '2' AND mo2.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) ) as ordersLast30Days, ( SELECT
+        COALESCE(SUM(mo3.price), 0) FROM master_order mo3 WHERE mo3.chief_id = #{chiefId} AND
+        mo3.status = '2' AND mo3.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) ) as
+        revenueLast30Days FROM master_order mo LEFT JOIN master_comment mcm ON mo.comment_id =
+        mcm.comment_id WHERE mo.chief_id = #{chiefId} AND mo.status = '2' </select>
 
     <!-- 查询近30天订单历史 -->
     <select id="getOrderHistory" resultType="com.ruoyi.pda.domain.VO.OrderHistory"> SELECT
-        DATE(mo.finish_time) AS date, COUNT(1) AS orderCount FROM master_order mo WHERE mo.chief_id
-        = #{chiefId} AND mo.status = '2' AND mo.finish_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-        GROUP BY DATE(mo.finish_time) </select>
+        DATE(mo.create_time) AS date, COUNT(1) AS orderCount FROM master_order mo WHERE mo.chief_id
+        = #{chiefId} AND mo.status = '2' AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        GROUP BY DATE(mo.create_time) ORDER BY date ASC </select>
     <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select
         mca.auth_id as authId,mca.real_name as realName,mca.id_code as idCode,mca.request_time as
         requestTime,mca.identify_image as image,mca.status as status,mca.user_id as userId,mca.years

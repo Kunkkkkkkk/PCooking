@@ -211,10 +211,11 @@ public class SocialController extends BaseController
      * 获取前端所需的社交内容列表(无需权限)
      */
     @GetMapping("/frontlist")
-    public AjaxResult frontList(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size)
+    public AjaxResult frontList(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,@RequestParam("type")String type)
     {
         Social social = new Social();
         social.setStatus("0"); // 只查询正常状态的
+        social.setType(type);
         PageHelper.startPage(page, size);
         List<Social> list = socialService.selectSocialList(social);
         PageInfo<Social> pageInfo = new PageInfo<>(list);
