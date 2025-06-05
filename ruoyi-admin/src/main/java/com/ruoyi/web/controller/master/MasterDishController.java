@@ -27,8 +27,7 @@ public class MasterDishController extends BaseController {
     }
     @PostMapping("/master/dishes/updateStatus")
     public AjaxResult updateStatus(@RequestBody Dishes dishes) {
-        dishService.updateState(dishes);
-        return AjaxResult.success();
+        return dishService.updateState(dishes);
     }
 
     @GetMapping("/master/dishes/getDishesMaterialList")
@@ -39,19 +38,18 @@ public class MasterDishController extends BaseController {
     @Transactional(rollbackFor = Exception.class)
     @PostMapping("/master/dishes/updateDish")
     public AjaxResult updateDish(@RequestBody Dishes dishes) {
-        dishService.updateDish(dishes);
-        return AjaxResult.success();
+        return dishService.updateDish(dishes);
     }
 
     /**
      * 食材条件查询
-     * @param name
+     * @param query
      * @return
      */
     @GetMapping("/master/ingredients/pageList")
-    public TableDataInfo getIngredientsList(String name) {
+    public TableDataInfo getIngredientsList(Ingredient query) {
         startPage();
-        List<Ingredient> list = dishService.getIngredientsList(name);
+        List<Ingredient> list = dishService.getIngredientsList(query);
         return getDataTable(list);
     }
 
@@ -62,7 +60,7 @@ public class MasterDishController extends BaseController {
     @GetMapping("master/ingredients/list")
     public AjaxResult getIngredientsList( ) {
         AjaxResult ajaxResult = AjaxResult.success();
-        List<Ingredient> list = dishService.getIngredientsList("");
+        List<Ingredient> list = dishService.getIngredientsList(new Ingredient());
         ajaxResult.put("rows", list);
         return ajaxResult;
     }
@@ -75,8 +73,8 @@ public class MasterDishController extends BaseController {
     @PostMapping("/master/ingredients/add")
     public AjaxResult addIngredient(@RequestBody Ingredient ingredient) {
         AjaxResult ajaxResult = AjaxResult.success();
-        dishService.addIngredient(ingredient);
-        return ajaxResult;
+        return dishService.addIngredient(ingredient);
+
     }
 
     /**
@@ -86,9 +84,7 @@ public class MasterDishController extends BaseController {
      */
     @PostMapping("/master/ingredients/update")
     public AjaxResult updateIngredient(@RequestBody Ingredient ingredient) {
-        AjaxResult ajaxResult = AjaxResult.success();
-        dishService.updateIngredient(ingredient);
-        return ajaxResult;
+        return dishService.updateIngredient(ingredient);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.ruoyi.web.service.impl;
 
 import java.util.List;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,13 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public void updateState(Dishes dishes) {
+    public AjaxResult updateState(Dishes dishes) {
+        if(dishMapper.isCheckUpdate(dishes)>0){
         dishMapper.updateState(dishes);
+        return AjaxResult.success();
+        }else {
+        return AjaxResult.error("数据已被他人修改，请刷新重试");
+        }
     }
 
     @Override
@@ -32,10 +38,15 @@ public class DishServiceImpl implements DishService {
     }
     @Transactional
     @Override
-    public void updateDish(Dishes dishes) {
-        dishMapper.updateDish(dishes);
-        dishMapper.deleteMaterial(dishes.getDishId());
-        dishMapper.insertMaterial(dishes.getDishId(),dishes.getDishMaterials());
+    public AjaxResult updateDish(Dishes dishes) {
+        if(dishMapper.isCheckUpdate(dishes)>0) {
+            dishMapper.updateDish(dishes);
+            dishMapper.deleteMaterial(dishes.getDishId());
+            dishMapper.insertMaterial(dishes.getDishId(), dishes.getDishMaterials());
+            return AjaxResult.success();
+        }else {
+            return AjaxResult.error("数据已被他人修改，请刷新重试");
+        }
     }
     @Override
     public void insertDish(Dishes dishes) {
@@ -43,18 +54,24 @@ public class DishServiceImpl implements DishService {
         dishMapper.insertMaterial(dishes.getDishId(),dishes.getDishMaterials());
     }
    @Override
-    public List<Ingredient> getIngredientsList(String name) {
-        return dishMapper.getIngredientsList(name);
+    public List<Ingredient> getIngredientsList(Ingredient query) {
+        return dishMapper.getIngredientsList(query);
     }
 
     @Override
-    public void addIngredient(Ingredient ingredient) {
-        dishMapper.insertIngredient(ingredient);
+    public AjaxResult addIngredient(Ingredient ingredient) {
+        if(dishMapper.getIngredientsList(ingredient).size()>0){
+            return AjaxResult.error("该食材已存在");
+        }else {
+            dishMapper.insertIngredient(ingredient);
+            return AjaxResult.success();
+        }
     }
 
     @Override
-    public void updateIngredient(Ingredient ingredient) {
+    public AjaxResult updateIngredient(Ingredient ingredient) {
         dishMapper.updateIngredient(ingredient);
+        return AjaxResult.success();
     }
 
     @Override

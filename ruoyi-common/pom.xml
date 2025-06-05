@@ -36,6 +36,13 @@
             <artifactId>spring-web</artifactId>
         </dependency>
 
+        <!--hutool-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.38</version>
+        </dependency>
+
         <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

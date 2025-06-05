@@ -3,6 +3,7 @@
 <mapper namespace="com.ruoyi.web.mapper.DishMapper">
     <resultMap id="DishWithMaterialsMap" type="com.ruoyi.pda.domain.Dishes">
         <id property="dishId" column="dishId" />
+        <result property="modifyTime" column="modifyTime" />
         <result property="name" column="name" />
         <result property="price" column="price" />
         <result property="status" column="status" />
@@ -10,31 +11,29 @@
         <result property="tags" column="tags" />
         <result property="typeDictCode" column="typeDictCode" />
         <result property="typeName" column="typeName" />
-        <collection property="dishMaterials" ofType="com.ruoyi.pda.domain.DishMaterial">
-            <result property="ingredientId" column="ingredientId" />
-            <result property="name" column="ingredientName" />
-            <result property="quantity" column="quantity" />
-            <result property="unit" column="unit" />
-            <result property="isRequired" column="isRequired" />
-            <result property="extraPrice" column="extraPrice" />
-        </collection>
+        <result property="discount" column="discount" />
+        <collection property="dishMaterials" ofType="com.ruoyi.pda.domain.DishMaterial"
+            select="getMaterialsByDishId" column="dishId" />
     </resultMap>
 
     <select id="getAll" resultMap="DishWithMaterialsMap"> SELECT d.dish_id as dishId, d.name,
-        d.price, d.status, d.image, d.tags, sd.dict_code AS typeDictCode, sd.dict_label AS typeName,
-        mdi.quantity, mdi.unit, mdi.is_required as isRequired, mdi.extra_price as extraPrice,
-        mi.ingredient_name AS ingredientName, mi.ingredient_id as ingredientId FROM master_dishes d
-        LEFT JOIN sys_dict_data sd ON d.type_dict_code = sd.dict_code LEFT JOIN
-        master_dish_ingredients mdi ON d.dish_id = mdi.dish_id LEFT JOIN master_ingredients mi ON
-        mdi.ingredient_id = mi.ingredient_id <where>
-            <if test="status != null"> AND d.status = #{status} </if>
+        d.modifyTime as modifyTime, d.discount as discount, d.price, d.status, d.image, d.tags,
+        d.type_dict_code AS typeDictCode, sd.dict_label AS typeName FROM master_dishes d LEFT JOIN
+        sys_dict_data sd ON d.type_dict_code = sd.dict_code <where> 1=1 <if
+                test="status != null and status!=''"> AND d.status = #{status} </if>
             <if
                 test="typeDictCode != null and typeDictCode != 0"> AND d.type_dict_code =
         #{typeDictCode} </if>
             <if test="name != null and name != ''"> AND d.name LIKE CONCAT('%',
         #{name}, '%') </if>
-        </where>
-    </select>
+        </where> ORDER BY d.dish_id </select>
+
+    <!-- 新增：根据菜品ID查询食材 -->
+    <select id="getMaterialsByDishId" resultType="com.ruoyi.pda.domain.DishMaterial"> SELECT
+        mdi.ingredient_id as ingredientId, mi.ingredient_name as name, mdi.quantity, mdi.unit,
+        mdi.is_required as isRequired, mdi.extra_price as extraPrice FROM master_dish_ingredients
+        mdi LEFT JOIN master_ingredients mi ON mdi.ingredient_id = mi.ingredient_id WHERE
+        mdi.dish_id = #{dishId} </select>
 
     <!-- deleteDish -->
 
@@ -49,8 +48,8 @@
     <!-- insertDish -->
 
     <insert id="insertDish" useGeneratedKeys="true" keyProperty="dishId"> Insert into master_dishes
-        (name,type_dict_code,status,price,image,tags) values
-        (#{name},#{typeDictCode},#{status},#{price},#{image},#{tags}) </insert>
+        (name,type_dict_code,status,price,image,tags,modifyTime,discount) values
+        (#{name},#{typeDictCode},#{status},#{price},#{image},#{tags},NOW(),#{discount}) </insert>
 
     <!-- insertMaterial -->
 
@@ -64,13 +63,17 @@
     <!-- updateDish -->
 
     <update id="updateDish"> UPDATE master_dishes SET name = #{name}, type_dict_code =
-        #{typeDictCode}, status = #{status}, price = #{price} ,image = #{image},tags=#{tags} WHERE
-        dish_id = #{dishId} </update>
+        #{typeDictCode}, status = #{status}, price = #{price} ,image =
+        #{image},tags=#{tags},modifyTime=NOW(),discount=#{discount} WHERE dish_id = #{dishId} </update>
 
     <!-- getIngredientsList-->
     <select id="getIngredientsList" resultType="com.ruoyi.pda.domain.Ingredient"> SELECT
-        ingredient_name as name ,ingredient_id as ingredientId from master_ingredients <where>
-            <if test="name !=null and name !=''">ingredient_name like CONCAT('%', #{name}, '%')</if>
+        ingredient_name as name ,ingredient_id as ingredientId ,type as type from master_ingredients <where>
+        1=1 <if test="name !=null and name !=''">AND ingredient_name like CONCAT('%', #{name}, '%')</if>
+            <if
+                test="type!=null and type!=''">AND type = #{type}</if>
         </where>
     </select>
+    <select id="isCheckUpdate" resultType="java.lang.Integer"> SELECT count(1) from master_dishes
+        where dish_id=#{dishId} and modifyTime=#{modifyTime} </select>
 </mapper>

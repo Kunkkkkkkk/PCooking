@@ -15,4 +15,6 @@ public class Dishes {
     private String image;
     private List<DishMaterial> dishMaterials;
     private String tags;
+    private String modifyTime;
+    private String discount;
 }

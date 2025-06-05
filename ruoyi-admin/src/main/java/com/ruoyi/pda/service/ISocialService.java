@@ -2,6 +2,7 @@ package com.ruoyi.pda.service;
 
 import java.util.List;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.pda.domain.Social;
 import com.ruoyi.pda.domain.SocialCollection;
 import com.ruoyi.pda.domain.SocialComment;
@@ -44,7 +45,7 @@ public interface ISocialService
      * @param social 社交内容信息
      * @return 结果
      */
-    public int updateSocial(Social social);
+    public AjaxResult updateSocial(Social social);
 
     /**
      * 删除社交内容信息
@@ -221,4 +222,6 @@ public interface ISocialService
     public List<SocialComment> selectUserComments(Long userId);
 
     int deleteSocialComment(Long commentId);
+
+    AjaxResult changeStatus(Social social);
 } 

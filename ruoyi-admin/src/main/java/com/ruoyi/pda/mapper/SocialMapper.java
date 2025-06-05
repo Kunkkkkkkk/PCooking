@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.ruoyi.pda.domain.Social;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * 社交内容 数据层
@@ -88,4 +90,8 @@ public interface SocialMapper
      * @return 结果
      */
     public int updateCommentCount(@Param("socialId") Long socialId);
-} 
+    @Select("select count(1) from master_social where update_time =#{updateTime} and social_id=#{socialId}")
+    public int checkUpdate(Social social);
+    @Update("update master_social set status=#{status},update_time=Now() where social_id=#{socialId} ")
+    void changeStatus(Social social);
+}

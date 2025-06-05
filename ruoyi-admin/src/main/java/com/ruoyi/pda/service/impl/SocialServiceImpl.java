@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -124,9 +125,14 @@ public class SocialServiceImpl implements ISocialService
      * @return 结果
      */
     @Override
-    public int updateSocial(Social social)
+    public AjaxResult updateSocial(Social social)
     {
-        return socialMapper.updateSocial(social);
+        if(socialMapper.checkUpdate(social)>0){
+            socialMapper.updateSocial(social);
+            return AjaxResult.success();
+        }else {
+            return AjaxResult.error("数据已被他人修改，刷新后重试");
+        }
     }
 
     /**
@@ -480,4 +486,13 @@ public class SocialServiceImpl implements ISocialService
         return rows;
     }
 
-} 
+    @Override
+    public AjaxResult changeStatus(Social social) {
+        if(socialMapper.checkUpdate(social)>0){
+            socialMapper.changeStatus(social);
+            return AjaxResult.success();
+        }else {
+            return AjaxResult.error("数据已被他人修改，刷新后重试");
+        }
+    }
+}

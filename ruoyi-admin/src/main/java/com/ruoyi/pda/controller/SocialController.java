@@ -58,6 +58,10 @@ public class SocialController extends BaseController
         List<Social> list = socialService.selectSocialList(social);
         return getDataTable(list);
     }
+    @PostMapping("/status")
+    public AjaxResult changeStatus(@RequestBody Social social){
+        return socialService.changeStatus(social);
+    }
     /**
      * 后台查询社交内容列表
      */
@@ -91,13 +95,13 @@ public class SocialController extends BaseController
     }
 
     /**
-     * 修改社交内容
+     * 修改社交内容（这里只更新了置顶状态）
      */
     @Log(title = "社交内容", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/update")
     public AjaxResult edit(@RequestBody Social social)
     {
-        return toAjax(socialService.updateSocial(social));
+        return socialService.updateSocial(social);
     }
 
     /**
@@ -331,5 +335,6 @@ public class SocialController extends BaseController
 
     }
         return error("上传图片异常，请联系管理员");}
+
 
 }
