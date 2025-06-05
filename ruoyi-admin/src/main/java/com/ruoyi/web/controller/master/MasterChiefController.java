@@ -189,7 +189,11 @@ public class MasterChiefController extends BaseController {
     @PostMapping("chief/orders/accept/{orderId}")
     public AjaxResult accept(@PathVariable Long orderId) {
         AjaxResult ajax = AjaxResult.success();
+        long orderUserId = orderService.getUserIdByOrderId(orderId);
         long userId = SecurityUtils.getUserId();
+        if (orderUserId == userId) {
+            return AjaxResult.error("无法接下自己的订单");
+        }
         ChiefVO chief = chiefService.findChiefByUserId(userId);
         orderService.accept(orderId, chief.getId());
         return ajax;

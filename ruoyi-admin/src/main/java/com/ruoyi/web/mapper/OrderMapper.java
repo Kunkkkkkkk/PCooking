@@ -105,4 +105,8 @@ public interface OrderMapper {
     OrderVO getCurrentOrder(@Param("userId")long userId);
 
     List<OrderVO> getList2(OrderQuery orderQuery);
+    @Select("SELECT user_id from master_chief where chief_id =#{chiefId}")
+    long getUserIdByChiefId(long chiefId);
+    @Select("SELECT user_id from master_order where order_id = #{orderId}")
+    long getUserIdByOrderId(Long orderId);
 }

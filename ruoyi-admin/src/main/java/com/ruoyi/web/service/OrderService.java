@@ -46,4 +46,8 @@ public interface OrderService {
     OrderVO getCurrentOrder();
 
     List<OrderVO> getList2(OrderQuery orderQuery);
+
+    long getUserIdByChiefId(long chiefId);
+
+    long getUserIdByOrderId(Long orderId);
 }

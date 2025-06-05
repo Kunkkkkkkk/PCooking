@@ -35,7 +35,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderItemMapper orderItemMapper;
-    
+    @Autowired
+    private OrderService orderService;
+
     @Override
     public List<OrderVO> getList(OrderQuery orderQuery) {
         // 先取消超时的未支付订单
@@ -214,6 +216,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderVO> getList2(OrderQuery orderQuery) {
         return orderMapper.getList2(orderQuery);
+    }
+
+    @Override
+    public long getUserIdByChiefId(long chiefId) {
+        return orderMapper.getUserIdByChiefId(chiefId);
+    }
+
+    @Override
+    public long getUserIdByOrderId(Long orderId) {
+        return orderMapper.getUserIdByOrderId(orderId);
     }
 }
 

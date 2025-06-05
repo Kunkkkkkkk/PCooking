@@ -29,6 +29,7 @@ import com.ruoyi.web.service.OrderService;
 public class MasterOrderController extends BaseController {
     @Autowired
     private OrderService orderService;
+
     @GetMapping("/master/order/pageList")
     public TableDataInfo pageList(OrderQuery orderQuery) {
         startPage();
@@ -82,10 +83,15 @@ public class MasterOrderController extends BaseController {
         createOrderDTO.setUserId(userId);
         createOrderDTO.setStatus("-1"); // 设置为待支付状态
         createOrderDTO.setCreateTime(DateUtil.date());
-        
+        if(createOrderDTO.getChiefId()!=null) {
+            long chiefUserId = orderService.getUserIdByChiefId(createOrderDTO.getChiefId());
+            if (chiefUserId==userId) {
+                return AjaxResult.error("为了避免恶意刷单，厨师无法自己给自己下单");
+            }
+        }
         // 调用服务创建订单
         long orderId = orderService.createOrder(createOrderDTO);
-        
+
         AjaxResult ajax = AjaxResult.success("订单创建成功");
         ajax.put("orderId", orderId);
         return ajax;
