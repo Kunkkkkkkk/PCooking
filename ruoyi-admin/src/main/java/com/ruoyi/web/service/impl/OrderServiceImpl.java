@@ -1,12 +1,10 @@
 package com.ruoyi.web.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.hutool.core.date.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,8 @@ import com.ruoyi.pda.domain.VO.OrderVO;
 import com.ruoyi.web.mapper.OrderItemMapper;
 import com.ruoyi.web.mapper.OrderMapper;
 import com.ruoyi.web.service.OrderService;
+
+import cn.hutool.core.date.DateUtil;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -226,6 +226,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public long getUserIdByOrderId(Long orderId) {
         return orderMapper.getUserIdByOrderId(orderId);
+    }
+
+    @Override
+    public boolean isOrderAvailable(Long orderId) {
+        // 获取订单状态
+        Order order = orderMapper.selectOrderById(orderId);
+        if (order == null) {
+            return false;
+        }
+        // 检查订单状态是否为待接单状态
+        return "0".equals(order.getStatus());
     }
 }
 

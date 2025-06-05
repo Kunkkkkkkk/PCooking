@@ -109,4 +109,6 @@ public interface OrderMapper {
     long getUserIdByChiefId(long chiefId);
     @Select("SELECT user_id from master_order where order_id = #{orderId}")
     long getUserIdByOrderId(Long orderId);
+
+    Order selectOrderById(Long orderId);
 }

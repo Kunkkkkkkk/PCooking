@@ -99,4 +99,14 @@
                 test="status != null and status != ''"> AND mo.status = #{status} </if>
         </where>
         order by mo.create_time desc </select>
+    <select id="selectOrderById" resultType="com.ruoyi.pda.domain.Order">
+        SELECT
+            order_id as orderId,
+            user_id as userId,
+            price as price,
+            status as status,
+            remark as remark
+            FROM master_order
+        WHERE order_id=#{orderId}
+    </select>
 </mapper>

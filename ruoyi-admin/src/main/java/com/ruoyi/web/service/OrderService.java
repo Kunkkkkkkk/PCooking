@@ -50,4 +50,12 @@ public interface OrderService {
     long getUserIdByChiefId(long chiefId);
 
     long getUserIdByOrderId(Long orderId);
+
+    /**
+     * 检查订单是否可以被接单
+     * @param orderId 订单ID
+     * @return 是否可用
+     */
+    public boolean isOrderAvailable(Long orderId);
+
 }

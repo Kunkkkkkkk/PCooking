@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.master;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +18,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.RedisLockUtil;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
 import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
@@ -35,6 +37,12 @@ public class MasterChiefController extends BaseController {
     private ChiefService chiefService;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private RedisLockUtil redisLockUtil;
+
+    private static final String ORDER_LOCK_PREFIX = "order:lock:";
+    private static final long LOCK_TIMEOUT = 30L;
+
     //厨师查询
     @GetMapping("/chief/pageList")
     public TableDataInfo pageList(ChiefQuery chiefQuery) {
@@ -188,15 +196,46 @@ public class MasterChiefController extends BaseController {
 
     @PostMapping("chief/orders/accept/{orderId}")
     public AjaxResult accept(@PathVariable Long orderId) {
-        AjaxResult ajax = AjaxResult.success();
-        long orderUserId = orderService.getUserIdByOrderId(orderId);
         long userId = SecurityUtils.getUserId();
+        
+        // 检查是否是自己的订单
+        long orderUserId = orderService.getUserIdByOrderId(orderId);
         if (orderUserId == userId) {
             return AjaxResult.error("无法接下自己的订单");
         }
+
+        // 获取厨师信息
         ChiefVO chief = chiefService.findChiefByUserId(userId);
-        orderService.accept(orderId, chief.getId());
-        return ajax;
+        if (chief == null) {
+            return AjaxResult.error("未找到厨师信息");
+        }
+
+        // 构建锁键和锁值
+        String lockKey = ORDER_LOCK_PREFIX + orderId;
+        String lockValue = chief.getId() + ":" + System.currentTimeMillis();
+
+        try {
+            // 尝试获取分布式锁
+            boolean locked = redisLockUtil.tryLock(lockKey, lockValue, LOCK_TIMEOUT, TimeUnit.SECONDS);
+            if (!locked) {
+                return AjaxResult.error("订单正在被其他厨师处理，请稍后再试");
+            }
+
+            // 二次检查订单状态
+            if (!orderService.isOrderAvailable(orderId)) {
+                return AjaxResult.error("订单已被其他厨师接单");
+            }
+
+            // 执行接单操作
+            orderService.accept(orderId, chief.getId());
+            return AjaxResult.success("接单成功");
+
+        } catch (Exception e) {
+            return AjaxResult.error("接单失败：" + e.getMessage());
+        } finally {
+            // 释放分布式锁
+            redisLockUtil.releaseLock(lockKey, lockValue);
+        }
     }
     //取消订单（待烹饪）
     @PostMapping("/chief/orders/cancel/{orderId}")
