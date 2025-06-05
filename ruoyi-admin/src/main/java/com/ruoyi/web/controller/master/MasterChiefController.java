@@ -194,7 +194,11 @@ public class MasterChiefController extends BaseController {
         orderService.accept(orderId, chief.getId());
         return ajax;
     }
-
+    //取消订单（待烹饪）
+    @PostMapping("/chief/orders/cancel/{orderId}")
+    public AjaxResult cancel(@PathVariable Long orderId) {
+        return chiefService.cancel(orderId);
+    }
     @PostMapping("chief/cook/{orderId}")
     public AjaxResult cookComplete(@PathVariable Long orderId) {
         AjaxResult ajax = AjaxResult.success();

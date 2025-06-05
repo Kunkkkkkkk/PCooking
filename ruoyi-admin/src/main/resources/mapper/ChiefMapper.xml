@@ -68,6 +68,9 @@
     <!-- 拒绝厨师认证申请 -->
     <update id="rejectChiefAuth"> UPDATE master_chief_auth SET status = '2', reply = #{reason} WHERE
         user_id = #{userId} </update>
+    <update id="cancle">
+        UPDATE master_order set status='0',chief_id=null where order_id =#{orderId}
+    </update>
 
     <!-- 插入厨师信息 -->
     <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role, join_time)

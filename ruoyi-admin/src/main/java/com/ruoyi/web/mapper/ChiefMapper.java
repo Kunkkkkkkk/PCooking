@@ -88,4 +88,6 @@ public interface ChiefMapper {
      * @return 我的订单列表
      */
     List<OrderVO> getMyPendingOrders(@Param("userId") Long userId, @Param("status") String status);
+
+    void cancle(Long orderId);
 }

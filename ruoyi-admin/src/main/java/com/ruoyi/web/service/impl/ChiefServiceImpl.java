@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -198,5 +199,11 @@ public class ChiefServiceImpl implements ChiefService {
     @Override
     public ChiefVO findChiefByUserId(Long userId) {
         return chiefMapper.findChiefByUserId(userId);
+    }
+
+    @Override
+    public AjaxResult cancel(Long orderId) {
+        chiefMapper.cancle(orderId);
+        return AjaxResult.success();
     }
 }

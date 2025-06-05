@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.hutool.core.date.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
         order.setChiefId(createOrderDTO.getChiefId());
         order.setPrice(createOrderDTO.getPrice());
         order.setStatus(createOrderDTO.getStatus());
-        order.setCreateTime(LocalDateTime.now());
+        order.setCreateTime(DateUtil.date());
         order.setOrderTime(createOrderDTO.getOrderTime());
         order.setRemark(createOrderDTO.getRemark());
         

@@ -2,6 +2,7 @@ package com.ruoyi.web.service;
 
 import java.util.List;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
 import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import com.ruoyi.pda.domain.DTO.ChiefDTO;
@@ -79,4 +80,6 @@ public interface ChiefService {
      * @return 厨师信息
      */
     ChiefVO findChiefByUserId(Long userId);
+
+    AjaxResult cancel(Long orderId);
 }

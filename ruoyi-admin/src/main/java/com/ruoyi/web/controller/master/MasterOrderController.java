@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import cn.hutool.core.date.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,7 +81,7 @@ public class MasterOrderController extends BaseController {
         // 设置订单基本信息
         createOrderDTO.setUserId(userId);
         createOrderDTO.setStatus("-1"); // 设置为待支付状态
-        createOrderDTO.setCreateTime(LocalDateTime.now());
+        createOrderDTO.setCreateTime(DateUtil.date());
         
         // 调用服务创建订单
         long orderId = orderService.createOrder(createOrderDTO);
