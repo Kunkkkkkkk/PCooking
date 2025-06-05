@@ -6,6 +6,7 @@
         <id property="collectionId" column="collection_id" />
         <result property="socialId" column="social_id" />
         <result property="userId" column="user_id" />
+        <result property="folderName" column="folder_name" />
         <result property="createTime" column="create_time" />
         <association property="user" column="user_id"
             javaType="com.ruoyi.common.core.domain.entity.SysUser" resultMap="userResult" />
@@ -38,10 +39,10 @@
     </resultMap>
 
     <sql id="selectSocialCollectionVo"> select c.collection_id, c.social_id, c.user_id,
-        c.create_time, u.user_name, u.nick_name, u.email, u.phonenumber, u.sex, u.avatar, u.status,
-        u.login_date, s.user_id as s_user_id, s.content, s.image_url, s.image_height, s.tags,
-        s.status as s_status, s.create_time as s_create_time, s.update_time from
-        master_social_collection c left join sys_user u on c.user_id = u.user_id left join
+        c.folder_name, c.create_time, u.user_name, u.nick_name, u.email, u.phonenumber, u.sex,
+        u.avatar, u.status, u.login_date, s.user_id as s_user_id, s.content, s.image_url,
+        s.image_height, s.tags, s.status as s_status, s.create_time as s_create_time, s.update_time
+        from master_social_collection c left join sys_user u on c.user_id = u.user_id left join
         master_social s on c.social_id = s.social_id </sql>
 
     <select id="selectSocialCollectionList" parameterType="com.ruoyi.pda.domain.SocialCollection"
@@ -71,11 +72,15 @@
             test="collectionId != null">collection_id,</if>
             <if test="socialId != null">social_id,</if>
             <if
-            test="userId != null">user_id,</if> create_time ) values ( <if
+            test="userId != null">user_id,</if>
+            <if test="folderName!=null and folderName!=''">
+        folder_name,</if> create_time ) values ( <if
             test="collectionId != null">#{collectionId},</if>
             <if test="socialId != null">
         #{socialId},</if>
-            <if test="userId != null">#{userId},</if> sysdate() ) </insert>
+            <if test="userId != null">#{userId},</if>
+        <if
+            test="folderName!=null and folderName!=''">#{folderName},</if> sysdate() ) </insert>
 
     <delete id="deleteSocialCollectionById" parameterType="Long"> delete from
         master_social_collection where collection_id = #{collectionId} </delete>

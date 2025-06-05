@@ -25,6 +25,10 @@ public class SocialCollection extends BaseEntity
     @Excel(name = "用户ID")
     private Long userId;
 
+    /** 收藏夹名称 */
+    @Excel(name = "收藏夹名称")
+    private String folderName = "默认";
+
     /** 关联的用户信息 */
     private SysUser user;
     
@@ -61,6 +65,16 @@ public class SocialCollection extends BaseEntity
         return userId;
     }
 
+    public void setFolderName(String folderName) 
+    {
+        this.folderName = folderName;
+    }
+
+    public String getFolderName() 
+    {
+        return folderName;
+    }
+
     public SysUser getUser() 
     {
         return user;
@@ -87,6 +101,7 @@ public class SocialCollection extends BaseEntity
             .append("collectionId", getCollectionId())
             .append("socialId", getSocialId())
             .append("userId", getUserId())
+            .append("folderName", getFolderName())
             .append("createTime", getCreateTime())
             .append("user", getUser())
             .append("social", getSocial())

@@ -232,7 +232,19 @@ public class SocialController extends BaseController
     }
 
     /**
-     * 收藏社交内容
+     * 收藏社交内容（新版：支持收藏夹）
+     */
+    @Log(title = "社交内容收藏", businessType = BusinessType.UPDATE)
+    @PostMapping("/collect")
+    public AjaxResult collect(@RequestBody Map<String, Object> params)
+    {
+        Long socialId = Long.valueOf(params.get("socialId").toString());
+        String folderName = params.get("folderName") != null ? params.get("folderName").toString() : "默认";
+        return toAjax(socialService.collectSocialToFolder(socialId, SecurityUtils.getUserId(), folderName));
+    }
+
+    /**
+     * 收藏社交内容（兼容旧版本）
      */
     @Log(title = "社交内容收藏", businessType = BusinessType.UPDATE)
     @PutMapping("/collect/{socialId}")
@@ -261,12 +273,53 @@ public class SocialController extends BaseController
     }
     
     /**
-     * 查询用户收藏的社交内容
+     * 查询用户收藏的社交内容（兼容旧版本）
      */
     @GetMapping("/collections")
     public AjaxResult collections()
     {
         return success(socialService.selectUserCollections(SecurityUtils.getUserId()));
+    }
+
+    /**
+     * 获取用户收藏夹列表
+     */
+    @GetMapping("/collection/folders")
+    public AjaxResult getUserCollectionFolders()
+    {
+        return success(socialService.getUserCollectionFolders(SecurityUtils.getUserId()));
+    }
+
+    /**
+     * 获取指定收藏夹的内容
+     */
+    @GetMapping("/collection/folders/{folderName}")
+    public AjaxResult getFolderContent(
+            @PathVariable String folderName,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize)
+    {
+        return success(socialService.getFolderContent(SecurityUtils.getUserId(), folderName, pageNum, pageSize));
+    }
+
+    /**
+     * 创建新收藏夹并收藏
+     */
+    @PostMapping("/collection/folders")
+    public AjaxResult createFolderAndCollect(@RequestBody Map<String, Object> params)
+    {
+        Long socialId = Long.valueOf(params.get("socialId").toString());
+        String folderName = params.get("folderName").toString();
+        return toAjax(socialService.collectSocialToFolder(socialId, SecurityUtils.getUserId(), folderName));
+    }
+
+    /**
+     * 检查收藏状态（返回收藏夹信息）
+     */
+    @GetMapping("/collection/check/{socialId}")
+    public AjaxResult checkCollectionStatus(@PathVariable Long socialId)
+    {
+        return success(socialService.checkCollectionStatus(socialId, SecurityUtils.getUserId()));
     }
 
     /**

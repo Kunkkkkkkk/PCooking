@@ -3,7 +3,6 @@ package com.ruoyi.pda.domain;
 import java.util.Date;
 import java.util.List;
 
-import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -11,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.core.domain.entity.SysUser;
+
+import lombok.Data;
 
 /**
  * 社交内容对象 master_social
@@ -71,6 +72,9 @@ public class Social extends BaseEntity
     
     /** 当前用户是否收藏 */
     private Boolean collected;
+    
+    /** 收藏时间（用于收藏夹页面显示） */
+    private Date collectionTime;
     
     /** 社交内容标签列表 */
     private List<String> tagList;

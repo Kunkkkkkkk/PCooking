@@ -1,6 +1,7 @@
 package com.ruoyi.pda.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.pda.domain.Social;
@@ -224,4 +225,31 @@ public interface ISocialService
     int deleteSocialComment(Long commentId);
 
     AjaxResult changeStatus(Social social);
+
+    // ================ 收藏夹相关方法 ================
+    
+    /**
+     * 收藏到指定收藏夹
+     */
+    public int collectSocialToFolder(Long socialId, Long userId, String folderName);
+
+    /**
+     * 取消收藏（删除所有收藏记录）
+     */
+    public int uncollectSocialFromFolder(Long socialId, Long userId, String folderName);
+
+    /**
+     * 获取用户收藏夹列表（带统计）
+     */
+    public List<Map<String, Object>> getUserCollectionFolders(Long userId);
+
+    /**
+     * 获取指定收藏夹的内容
+     */
+    public List<Social> getFolderContent(Long userId, String folderName, Integer pageNum, Integer pageSize);
+
+    /**
+     * 检查收藏状态
+     */
+    public Map<String, Object> checkCollectionStatus(Long socialId, Long userId);
 } 
