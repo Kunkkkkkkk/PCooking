@@ -256,4 +256,18 @@ public class MasterChiefController extends BaseController {
         return ajax;
     }
 
+    //主页厨师信息展示
+    @GetMapping("chief/team")
+    public AjaxResult team() {
+        ChiefQuery query = new ChiefQuery();
+        query.setStatus("0");
+        List<ChiefVO> list = chiefService.getChiefList(query);
+        return AjaxResult.success(list);
+    }
+    //主页厨师详情
+    @GetMapping("chief/{id}")
+    public AjaxResult chiefInfo(@PathVariable Long id) {
+        List<ChiefAuthVO> list = chiefService.getChiefInfo(id);
+        return AjaxResult.success(list);
+    }
 }

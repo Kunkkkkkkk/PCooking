@@ -2,6 +2,7 @@ package com.ruoyi.web.mapper;
 
 import java.util.List;
 
+import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
@@ -17,7 +18,7 @@ import com.ruoyi.pda.domain.VO.OrderVO;
 @Mapper
 public interface ChiefMapper {
     List<ChiefVO> getChiefList(ChiefQuery chiefQuery);
-    @Update("UPDATE master_chief set  status=#{status}, role=#{role}, real_name=#{realName} WHERE chief_id=#{chiefId}")
+    @Update("UPDATE master_chief set  status=#{status}, role=#{role}, real_name=#{realName},is_recommend=#{isRecommend},`desc`=#{description} WHERE chief_id=#{chiefId}")
     void editChief(ChiefDTO chiefDTO);
     ChiefVO getPerformanceSummary(long chiefId);
     List<OrderHistory> getOrderHistory(long chiefId);
@@ -65,7 +66,7 @@ public interface ChiefMapper {
      * @param realName 真实姓名
      * @return 结果
      */
-    int insertChief(@Param("userId") Long userId, @Param("realName") String realName);
+    int insertChief(ChiefAuthDTO chiefAuth);
 
 
     /**
@@ -90,4 +91,6 @@ public interface ChiefMapper {
     List<OrderVO> getMyPendingOrders(@Param("userId") Long userId, @Param("status") String status);
 
     void cancle(Long orderId);
+
+    List<ChiefAuthVO> getChiefInfo(Long id);
 }

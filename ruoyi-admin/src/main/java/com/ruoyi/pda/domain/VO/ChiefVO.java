@@ -20,7 +20,12 @@ public class ChiefVO {
     private int orderNum; // 总完成订单数
     private double averageTime;
     private String avatar;
-
+    //真实照片（展示用）
+    private String realPhoto;
+    //介绍信息
+    private String description;
+    //0无 1银牌厨师  2金牌厨师
+    private String isRecommend;
     // --- 新增绩效统计字段 ---
     private BigDecimal totalRevenue; // 总营业额 (使用 BigDecimal 保证精度)
     private int ordersLast30Days; // 近30天订单数

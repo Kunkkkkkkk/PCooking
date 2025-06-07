@@ -99,7 +99,8 @@ public class ChiefServiceImpl implements ChiefService {
          chiefAuth.setRemark(applyDTO.getRemark());
          chiefAuth.setStatus("0"); // 默认待审核
          chiefAuth.setRequestTime(LocalDateTime.now());
-        
+         chiefAuth.setRealPhoto(applyDTO.getRealPhoto());
+         chiefAuth.setSex(applyDTO.getSex());
         int result = chiefMapper.insertChiefAuth(chiefAuth);
         return result > 0;
     }
@@ -147,7 +148,7 @@ public class ChiefServiceImpl implements ChiefService {
 
         // 2. 插入厨师记录
         String realName = authDTO.getRealName() != null ? authDTO.getRealName() : "Unknown";
-        int insertResult = chiefMapper.insertChief(authDTO.getUserId(), realName);
+            int insertResult = chiefMapper.insertChief(authDTO);
         if (insertResult <= 0) {
             // 插入失败，需要回滚事务
             throw new RuntimeException("创建厨师记录失败");
@@ -205,5 +206,10 @@ public class ChiefServiceImpl implements ChiefService {
     public AjaxResult cancel(Long orderId) {
         chiefMapper.cancle(orderId);
         return AjaxResult.success();
+    }
+
+    @Override
+    public List<ChiefAuthVO> getChiefInfo(Long id) {
+        return chiefMapper.getChiefInfo(id);
     }
 }

@@ -4,7 +4,7 @@
     <select id="getChiefList" resultType="com.ruoyi.pda.domain.VO.ChiefVO">
         <!-- 获取厨师列表，包含电话、角色名称、角色代码以及评分平均值 --> SELECT mu.phonenumber AS
         phone,mc.real_name as name,mc.chief_id as id,sd.dict_label AS role_name,mc.status as
-        status,mc.role AS role, COALESCE(AVG(mcm.rating), 0) AS rating,mc.join_time as joinTime FROM
+        status,mc.role AS role, COALESCE(AVG(mcm.rating), 0) AS rating,mc.join_time as joinTime,mc.is_recommend as isRecommend,mc.real_photo as realPhoto,mc.description as description FROM
         master_chief mc LEFT JOIN sys_user mu ON mc.user_id = mu.user_id LEFT JOIN sys_dict_data sd
         ON mc.role = sd.dict_code LEFT JOIN master_order mo ON mo.chief_id = mc.chief_id LEFT JOIN
         master_comment mcm ON mo.comment_id = mcm.comment_id <where>
@@ -29,8 +29,8 @@
         DATE(mo.create_time) AS date, COUNT(1) AS orderCount FROM master_order mo WHERE mo.chief_id
         = #{chiefId} AND mo.status = '2' AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         GROUP BY DATE(mo.create_time) ORDER BY date ASC </select>
-    <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select
-        mca.auth_id as authId,mca.real_name as realName,mca.id_code as idCode,mca.request_time as
+    <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select mca.sex as sex,
+        mca.auth_id as authId,mca.real_name as realName,mca.real_photo as realPhoto,mca.id_code as idCode,mca.request_time as
         requestTime,mca.identify_image as image,mca.status as status,mca.user_id as userId,mca.years
         as years,mca.cuisine as cuisine,mca.remark as remark,mca.reply as reply,su.phonenumber as
         phone,su.sex as sex from master_chief_auth mca left join sys_user su on mca.user_id =
@@ -44,12 +44,12 @@
     <!-- 新增厨师认证申请 -->
     <insert id="insertChiefAuth" parameterType="com.ruoyi.pda.domain.ChiefAuth"> insert into
         master_chief_auth(user_id, real_name, id_code, link_phone, years, cuisine, identify_image,
-        remark, status, request_time) values(#{userId}, #{realName}, #{idCode}, #{linkPhone},
-        #{years}, #{cuisine}, #{image}, #{remark}, #{status}, #{requestTime}) </insert>
+        remark, status, request_time,real_photo,sex) values(#{userId}, #{realName}, #{idCode}, #{linkPhone},
+        #{years}, #{cuisine}, #{image}, #{remark}, #{status}, #{requestTime},#{realPhoto},#{sex}) </insert>
 
     <!-- 根据用户ID查询最新的厨师认证申请 -->
     <select id="getChiefAuthByUserId" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select
-        mca.auth_id as authId, mca.real_name as realName, mca.id_code as idCode, mca.request_time as
+        mca.auth_id as authId,mca.real_photo as realPhoto, mca.real_name as realName, mca.id_code as idCode, mca.request_time as
         requestTime, mca.identify_image as image, mca.status as status, mca.user_id as userId,
         mca.years as years, mca.cuisine as cuisine, mca.remark as remark, mca.reply as reply,
         mca.link_phone as phone, su.sex as sex from master_chief_auth mca left join sys_user su on
@@ -73,8 +73,8 @@
     </update>
 
     <!-- 插入厨师信息 -->
-    <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role, join_time)
-        VALUES (#{userId}, #{realName}, '0', '107', NOW()) </insert>
+    <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role, join_time,description,real_photo,is_recommend)
+        VALUES (#{userId}, #{realName}, '0', '107', NOW(),#{description},#{realPhoto},'0') </insert>
 
     <!-- 获取预约时间里可用的厨师信息 -->
     <select id="getChefs" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT mc.chief_id AS id,
@@ -106,4 +106,14 @@
         sys_user su ON mo.user_id = su.user_id WHERE mo.chief_id = (SELECT chief_id FROM
         master_chief WHERE user_id = #{userId}) AND mo.status = #{status} ORDER BY mo.create_time
         DESC </select>
+    <select id="getChiefInfo" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO">
+        SELECT
+            mca.years as years,
+            GROUP_CONCAT(sdd.dict_label ORDER BY sdd.dict_code SEPARATOR ',') as cuisine
+        FROM master_chief mc
+                 LEFT JOIN master_chief_auth mca ON mc.user_id = mca.user_id
+                 LEFT JOIN sys_dict_data sdd ON FIND_IN_SET(sdd.dict_code, mca.cuisine) > 0
+        WHERE mca.cuisine IS NOT NULL AND mca.cuisine != '' AND mc.chief_id=#{id}
+        GROUP BY mc.chief_id, mca.years;
+        </select>
 </mapper>

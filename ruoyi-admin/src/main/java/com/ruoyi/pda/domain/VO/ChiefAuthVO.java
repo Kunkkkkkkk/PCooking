@@ -20,4 +20,5 @@ public class ChiefAuthVO {
     private String reply;
     private String phone;
     private String sex;
+    private String realPhoto;
 }

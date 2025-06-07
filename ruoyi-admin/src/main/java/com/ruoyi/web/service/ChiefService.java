@@ -82,4 +82,6 @@ public interface ChiefService {
     ChiefVO findChiefByUserId(Long userId);
 
     AjaxResult cancel(Long orderId);
+
+    List<ChiefAuthVO> getChiefInfo(Long id);
 }

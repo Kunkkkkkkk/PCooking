@@ -40,4 +40,5 @@ public class ChiefApplyDTO {
     @Size(max = 500, message = "个人介绍不能超过500字")
     private String remark;
 
+    private String realPhoto;
 } 

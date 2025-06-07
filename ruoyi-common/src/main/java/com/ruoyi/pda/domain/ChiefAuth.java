@@ -46,4 +46,8 @@ public class ChiefAuth {
 
     /** 联系方式 */
     private String linkPhone; // 对应数据库 link_phone
-} 
+
+    private String realPhoto;
+
+    private String sex;
+}
