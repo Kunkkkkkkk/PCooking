@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ruoyi.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.pda.domain.ChiefAuth;
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
@@ -211,5 +211,139 @@ public class ChiefServiceImpl implements ChiefService {
     @Override
     public List<ChiefAuthVO> getChiefInfo(Long id) {
         return chiefMapper.getChiefInfo(id);
+    }
+
+    @Override
+    public Map<String, Object> getMyPerformanceData(Long chiefId, String timeRange) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 获取绩效统计数据
+        Map<String, Object> stats = chiefMapper.getPerformanceStats(chiefId, timeRange);
+        if (stats == null) {
+            stats = new HashMap<>();
+            stats.put("totalOrders", 0L);
+            stats.put("totalEarnings", BigDecimal.ZERO);
+            stats.put("completedOrders", 0L);
+            stats.put("canceledOrders", 0L);
+            stats.put("avgRating", 0.0);
+        }
+        
+        // 获取最受欢迎菜品
+        Map<String, Object> topDish = chiefMapper.getTopDish(chiefId, timeRange);
+        if (topDish == null) {
+            topDish = new HashMap<>();
+            topDish.put("dishName", "暂无数据");
+            topDish.put("orderCount", 0L);
+        }
+        
+        // 获取每日明细（仅本周）
+        List<Map<String, Object>> dailyDetails = new ArrayList<>();
+        if ("week".equals(timeRange)) {
+            dailyDetails = chiefMapper.getDailyPerformance(chiefId);
+        }
+        
+        // 计算衍生指标 - 安全的类型转换
+        int totalOrders = safeLongToInt(stats.get("totalOrders"));
+        BigDecimal totalEarnings = safeToBigDecimal(stats.get("totalEarnings"));
+        int completedOrders = safeLongToInt(stats.get("completedOrders"));
+        int canceledOrders = safeLongToInt(stats.get("canceledOrders"));
+        Double avgRating = safeToDouble(stats.get("avgRating"));
+        
+        // 处理topDish中的orderCount
+        int topDishCount = safeLongToInt(topDish.get("orderCount"));
+        
+        // 计算工作天数和日均数据
+        int workingDays = getWorkingDays(timeRange);
+        double avgOrdersPerDay = workingDays > 0 ? (double) totalOrders / workingDays : 0;
+        BigDecimal avgEarningsPerDay = workingDays > 0 ? 
+            totalEarnings.divide(new BigDecimal(workingDays), 2, BigDecimal.ROUND_HALF_UP) : 
+            BigDecimal.ZERO;
+        
+        // 组装返回数据
+        result.put("period", getPeriodText(timeRange));
+        result.put("totalOrders", totalOrders);
+        result.put("totalEarnings", totalEarnings.doubleValue());
+        result.put("avgOrdersPerDay", Math.round(avgOrdersPerDay * 10.0) / 10.0);
+        result.put("avgEarningsPerDay", avgEarningsPerDay.doubleValue());
+        result.put("completedOrders", completedOrders);
+        result.put("canceledOrders", canceledOrders);
+        result.put("rating", Math.round(avgRating * 10.0) / 10.0);
+        result.put("topDish", topDish.get("dishName"));
+        result.put("topDishCount", topDishCount);
+        result.put("workingDays", workingDays);
+        result.put("details", dailyDetails);
+        
+        return result;
+    }
+    
+    private int getWorkingDays(String timeRange) {
+        switch (timeRange) {
+            case "week": return 7;
+            case "month": return 30;
+            case "quarter": return 90;
+            case "year": return 360;
+            default: return 7;
+        }
+    }
+    
+    private String getPeriodText(String timeRange) {
+        switch (timeRange) {
+            case "week": return "本周";
+            case "month": return "本月";
+            case "quarter": return "本季度";
+            case "year": return "本年";
+            default: return "本周";
+        }
+    }
+    
+    /**
+     * 安全的Long到int转换
+     */
+    private int safeLongToInt(Object value) {
+        if (value == null) {
+            return 0;
+        }
+        if (value instanceof Long) {
+            return ((Long) value).intValue();
+        }
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return 0;
+    }
+    
+    /**
+     * 安全的BigDecimal转换
+     */
+    private BigDecimal safeToBigDecimal(Object value) {
+        if (value == null) {
+            return BigDecimal.ZERO;
+        }
+        if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        }
+        if (value instanceof Number) {
+            return new BigDecimal(value.toString());
+        }
+        return BigDecimal.ZERO;
+    }
+    
+    /**
+     * 安全的Double转换
+     */
+    private Double safeToDouble(Object value) {
+        if (value == null) {
+            return 0.0;
+        }
+        if (value instanceof Double) {
+            return (Double) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return 0.0;
     }
 }

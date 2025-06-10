@@ -1,13 +1,14 @@
 package com.ruoyi.web.mapper;
 
 import java.util.List;
+import java.util.Map;
 
-import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
 import com.ruoyi.pda.domain.ChiefAuth;
+import com.ruoyi.pda.domain.DTO.ChiefAuthDTO;
 import com.ruoyi.pda.domain.DTO.ChiefDTO;
 import com.ruoyi.pda.domain.DTO.ChiefQuery;
 import com.ruoyi.pda.domain.VO.ChiefAuthVO;
@@ -93,4 +94,27 @@ public interface ChiefMapper {
     void cancle(Long orderId);
 
     List<ChiefAuthVO> getChiefInfo(Long id);
+
+    /**
+     * 获取绩效统计数据
+     * @param chiefId 厨师ID
+     * @param timeRange 时间范围
+     * @return 统计数据
+     */
+    Map<String, Object> getPerformanceStats(@Param("chiefId") Long chiefId, @Param("timeRange") String timeRange);
+
+    /**
+     * 获取最受欢迎菜品
+     * @param chiefId 厨师ID
+     * @param timeRange 时间范围
+     * @return 菜品信息
+     */
+    Map<String, Object> getTopDish(@Param("chiefId") Long chiefId, @Param("timeRange") String timeRange);
+
+    /**
+     * 获取每日绩效明细（本周）
+     * @param chiefId 厨师ID
+     * @return 每日明细
+     */
+    List<Map<String, Object>> getDailyPerformance(@Param("chiefId") Long chiefId);
 }

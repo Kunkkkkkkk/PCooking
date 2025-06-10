@@ -3,17 +3,19 @@
 <mapper namespace="com.ruoyi.web.mapper.ChiefMapper">
     <select id="getChiefList" resultType="com.ruoyi.pda.domain.VO.ChiefVO">
         <!-- 获取厨师列表，包含电话、角色名称、角色代码以及评分平均值 --> SELECT mu.phonenumber AS
-        phone,mc.real_name as name,mc.chief_id as id,sd.dict_label AS role_name,mc.status as
-        status,mc.role AS role, COALESCE(AVG(mcm.rating), 0) AS rating,mc.join_time as joinTime,mc.is_recommend as isRecommend,mc.real_photo as realPhoto,mc.description as description FROM
-        master_chief mc LEFT JOIN sys_user mu ON mc.user_id = mu.user_id LEFT JOIN sys_dict_data sd
-        ON mc.role = sd.dict_code LEFT JOIN master_order mo ON mo.chief_id = mc.chief_id LEFT JOIN
-        master_comment mcm ON mo.comment_id = mcm.comment_id <where>
+        phone, mc.real_name as name, mc.chief_id as id, sd.dict_label AS role_name, mc.status as
+        status, mc.role AS role, COALESCE(AVG(CASE WHEN mo.status = '2' AND mcm.rating IS NOT NULL
+        THEN mcm.rating END), 0) AS rating, mc.join_time as joinTime, mc.is_recommend as
+        isRecommend, mc.real_photo as realPhoto, mc.description as description FROM master_chief mc
+        LEFT JOIN sys_user mu ON mc.user_id = mu.user_id LEFT JOIN sys_dict_data sd ON mc.role =
+        sd.dict_code LEFT JOIN master_order mo ON mo.chief_id = mc.chief_id LEFT JOIN master_comment
+        mcm ON mo.comment_id = mcm.comment_id <where>
             <if test="name != null and name != ''"> AND mc.real_name LIKE CONCAT('%', #{name}, '%') </if>
-        <if
+            <if
                 test="status != null and status != ''"> AND mc.status = #{status} </if>
         </where>
-        GROUP BY mu.phonenumber, sd.dict_label,
-        mc.role,mc.real_name,mc.status,mc.join_time,mc.chief_id</select>
+        GROUP BY mu.phonenumber, sd.dict_label, mc.role, mc.real_name, mc.status, mc.join_time,
+        mc.chief_id </select>
     <!-- 查询总数和总营业额 -->
     <select id="getPerformanceSummary" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT COUNT(1)
         as orderNum, COALESCE(SUM(mo.price), 0) as totalRevenue, ( SELECT COUNT(1) FROM master_order
@@ -29,12 +31,12 @@
         DATE(mo.create_time) AS date, COUNT(1) AS orderCount FROM master_order mo WHERE mo.chief_id
         = #{chiefId} AND mo.status = '2' AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         GROUP BY DATE(mo.create_time) ORDER BY date ASC </select>
-    <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select mca.sex as sex,
-        mca.auth_id as authId,mca.real_name as realName,mca.real_photo as realPhoto,mca.id_code as idCode,mca.request_time as
-        requestTime,mca.identify_image as image,mca.status as status,mca.user_id as userId,mca.years
-        as years,mca.cuisine as cuisine,mca.remark as remark,mca.reply as reply,su.phonenumber as
-        phone,su.sex as sex from master_chief_auth mca left join sys_user su on mca.user_id =
-        su.user_id <where>
+    <select id="getChiefAuthList" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select mca.sex
+        as sex, mca.auth_id as authId,mca.real_name as realName,mca.real_photo as
+        realPhoto,mca.id_code as idCode,mca.request_time as requestTime,mca.identify_image as
+        image,mca.status as status,mca.user_id as userId,mca.years as years,mca.cuisine as
+        cuisine,mca.remark as remark,mca.reply as reply,su.phonenumber as phone,su.sex as sex from
+        master_chief_auth mca left join sys_user su on mca.user_id = su.user_id <where>
             <if test="name !=null and name != ''"> and real_name like CONCAT('%', #{name}, '%') </if>
         <if
                 test="status != null and status != ''"> and mca.status = #{status} </if>
@@ -44,17 +46,18 @@
     <!-- 新增厨师认证申请 -->
     <insert id="insertChiefAuth" parameterType="com.ruoyi.pda.domain.ChiefAuth"> insert into
         master_chief_auth(user_id, real_name, id_code, link_phone, years, cuisine, identify_image,
-        remark, status, request_time,real_photo,sex) values(#{userId}, #{realName}, #{idCode}, #{linkPhone},
-        #{years}, #{cuisine}, #{image}, #{remark}, #{status}, #{requestTime},#{realPhoto},#{sex}) </insert>
+        remark, status, request_time,real_photo,sex) values(#{userId}, #{realName}, #{idCode},
+        #{linkPhone}, #{years}, #{cuisine}, #{image}, #{remark}, #{status},
+        #{requestTime},#{realPhoto},#{sex}) </insert>
 
     <!-- 根据用户ID查询最新的厨师认证申请 -->
     <select id="getChiefAuthByUserId" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> select
-        mca.auth_id as authId,mca.real_photo as realPhoto, mca.real_name as realName, mca.id_code as idCode, mca.request_time as
-        requestTime, mca.identify_image as image, mca.status as status, mca.user_id as userId,
-        mca.years as years, mca.cuisine as cuisine, mca.remark as remark, mca.reply as reply,
-        mca.link_phone as phone, su.sex as sex from master_chief_auth mca left join sys_user su on
-        mca.user_id = su.user_id where mca.user_id = #{userId} order by mca.request_time DESC limit
-        1 </select>
+        mca.auth_id as authId,mca.real_photo as realPhoto, mca.real_name as realName, mca.id_code as
+        idCode, mca.request_time as requestTime, mca.identify_image as image, mca.status as status,
+        mca.user_id as userId, mca.years as years, mca.cuisine as cuisine, mca.remark as remark,
+        mca.reply as reply, mca.link_phone as phone, su.sex as sex from master_chief_auth mca left
+        join sys_user su on mca.user_id = su.user_id where mca.user_id = #{userId} order by
+        mca.request_time DESC limit 1 </select>
 
     <!-- 根据用户ID查询厨师信息 -->
     <select id="findChiefByUserId" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT chief_id as
@@ -68,13 +71,12 @@
     <!-- 拒绝厨师认证申请 -->
     <update id="rejectChiefAuth"> UPDATE master_chief_auth SET status = '2', reply = #{reason} WHERE
         user_id = #{userId} </update>
-    <update id="cancle">
-        UPDATE master_order set status='0',chief_id=null where order_id =#{orderId}
-    </update>
+    <update id="cancle"> UPDATE master_order set status='0',chief_id=null where order_id =#{orderId} </update>
 
     <!-- 插入厨师信息 -->
-    <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role, join_time,description,real_photo,is_recommend)
-        VALUES (#{userId}, #{realName}, '0', '107', NOW(),#{description},#{realPhoto},'0') </insert>
+    <insert id="insertChief"> INSERT INTO master_chief (user_id, real_name, status, role,
+        join_time,description,real_photo,is_recommend) VALUES (#{userId}, #{realName}, '0', '107',
+        NOW(),#{description},#{realPhoto},'0') </insert>
 
     <!-- 获取预约时间里可用的厨师信息 -->
     <select id="getChefs" resultType="com.ruoyi.pda.domain.VO.ChiefVO"> SELECT mc.chief_id AS id,
@@ -91,29 +93,69 @@
     <select id="getNewOrders" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id as
         orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status, mo.create_time
         as createTime, mo.order_time as orderTime, su.user_name as userName, mo.comment_id as
-        commentId, mo.remark as remark, moi.dish_id as dishId, moi.dish_name as dishName,
-        moi.quantity, moi.price as itemPrice, moi.dish_image_url as dishImageUrl FROM master_order
-        mo LEFT JOIN master_order_item moi ON mo.order_id = moi.order_id LEFT JOIN sys_user su ON
-        mo.user_id = su.user_id WHERE mo.status = -1 ORDER BY mo.create_time DESC </select>
+        commentId, mo.remark as remark, moi.dish_id as dishId, md.name as dishName, moi.quantity,
+        moi.price as itemPrice, md.image as dishImageUrl FROM master_order mo LEFT JOIN
+        master_order_item moi ON mo.order_id = moi.order_id LEFT JOIN master_dishes md ON
+        moi.dish_id = md.dish_id LEFT JOIN sys_user su ON mo.user_id = su.user_id WHERE mo.status =
+        -1 ORDER BY mo.create_time DESC </select>
 
     <!-- getMyPendingOrders -->
     <select id="getMyPendingOrders" resultType="com.ruoyi.pda.domain.VO.OrderVO"> SELECT mo.order_id
         as orderId, mo.chief_id as chiefId, mo.user_id as userId, mo.price, mo.status,
         mo.create_time as createTime, mo.order_time as orderTime, su.user_name as userName,
-        mo.comment_id as commentId, mo.remark as remark, moi.dish_id as dishId, moi.dish_name as
-        dishName, moi.quantity, moi.price as itemPrice, moi.dish_image_url as dishImageUrl FROM
-        master_order mo LEFT JOIN master_order_item moi ON mo.order_id = moi.order_id LEFT JOIN
-        sys_user su ON mo.user_id = su.user_id WHERE mo.chief_id = (SELECT chief_id FROM
-        master_chief WHERE user_id = #{userId}) AND mo.status = #{status} ORDER BY mo.create_time
-        DESC </select>
-    <select id="getChiefInfo" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO">
-        SELECT
-            mca.years as years,
-            GROUP_CONCAT(sdd.dict_label ORDER BY sdd.dict_code SEPARATOR ',') as cuisine
-        FROM master_chief mc
-                 LEFT JOIN master_chief_auth mca ON mc.user_id = mca.user_id
-                 LEFT JOIN sys_dict_data sdd ON FIND_IN_SET(sdd.dict_code, mca.cuisine) > 0
-        WHERE mca.cuisine IS NOT NULL AND mca.cuisine != '' AND mc.chief_id=#{id}
-        GROUP BY mc.chief_id, mca.years;
-        </select>
+        mo.comment_id as commentId, mo.remark as remark, moi.dish_id as dishId, md.name as dishName,
+        moi.quantity, moi.price as itemPrice, md.image as dishImageUrl FROM master_order mo LEFT
+        JOIN master_order_item moi ON mo.order_id = moi.order_id LEFT JOIN master_dishes md ON
+        moi.dish_id = md.dish_id LEFT JOIN sys_user su ON mo.user_id = su.user_id WHERE mo.chief_id
+        = (SELECT chief_id FROM master_chief WHERE user_id = #{userId}) AND mo.status = #{status}
+        ORDER BY mo.create_time DESC </select>
+    <select id="getChiefInfo" resultType="com.ruoyi.pda.domain.VO.ChiefAuthVO"> SELECT mca.years as
+        years, GROUP_CONCAT(sdd.dict_label ORDER BY sdd.dict_code SEPARATOR ',') as cuisine FROM
+        master_chief mc LEFT JOIN master_chief_auth mca ON mc.user_id = mca.user_id LEFT JOIN
+        sys_dict_data sdd ON FIND_IN_SET(sdd.dict_code, mca.cuisine) > 0 WHERE mca.cuisine IS NOT
+        NULL AND mca.cuisine != '' AND mc.chief_id=#{id} GROUP BY mc.chief_id, mca.years; </select>
+
+    <!-- 获取绩效统计数据 -->
+    <select id="getPerformanceStats" resultType="java.util.Map"> SELECT COUNT(CASE WHEN mo.status !=
+        '-2' THEN 1 END) as totalOrders, COALESCE(SUM(CASE WHEN mo.status != '-2' THEN mo.price ELSE
+        0 END), 0) as totalEarnings, COUNT(CASE WHEN mo.status = '2' THEN 1 END) as completedOrders,
+        COUNT(CASE WHEN mo.status = '-2' THEN 1 END) as canceledOrders, COALESCE(AVG(CASE WHEN
+        mo.status = '2' AND mc.rating IS NOT NULL THEN mc.rating END), 0) as avgRating FROM
+        master_order mo LEFT JOIN master_comment mc ON mo.comment_id = mc.comment_id WHERE
+        mo.chief_id = #{chiefId} <if test="timeRange == 'week'"> AND mo.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) </if>
+        <if test="timeRange == 'month'"> AND mo.create_time
+        >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) </if>
+        <if test="timeRange == 'quarter'"> AND
+        mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 90 DAY) </if>
+        <if test="timeRange == 'year'">
+        AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 365 DAY) </if>
+    </select>
+
+    <!-- 获取最受欢迎菜品 -->
+    <select id="getTopDish" resultType="java.util.Map"> SELECT md.name as dishName, COUNT(*) as
+        orderCount FROM master_order mo INNER JOIN master_order_item moi ON mo.order_id =
+        moi.order_id INNER JOIN master_dishes md ON moi.dish_id = md.dish_id WHERE mo.chief_id =
+        #{chiefId} AND mo.status != '-2' <if
+            test="timeRange == 'week'"> AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) </if>
+        <if
+            test="timeRange == 'month'"> AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) </if>
+        <if
+            test="timeRange == 'quarter'"> AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 90
+        DAY) </if>
+        <if test="timeRange == 'year'"> AND mo.create_time >= DATE_SUB(CURDATE(), INTERVAL
+        365 DAY) </if> GROUP BY md.name ORDER BY COUNT(*) DESC LIMIT 1 </select>
+
+    <!-- 获取每日绩效明细（本周） -->
+    <select id="getDailyPerformance" resultType="java.util.Map"> SELECT CASE
+        DAYOFWEEK(DATE(mo.create_time)) WHEN 1 THEN '周日' WHEN 2 THEN '周一' WHEN 3 THEN '周二' WHEN 4
+        THEN '周三' WHEN 5 THEN '周四' WHEN 6 THEN '周五' WHEN 7 THEN '周六' END as date, COUNT(CASE WHEN
+        mo.status != '-2' THEN 1 END) as orders, COALESCE(SUM(CASE WHEN mo.status != '-2' THEN
+        mo.price ELSE 0 END), 0) as earnings, COALESCE(AVG(CASE WHEN mo.status = '2' AND mc.rating
+        IS NOT NULL THEN mc.rating END), 0) as rating FROM master_order mo LEFT JOIN master_comment
+        mc ON mo.comment_id = mc.comment_id WHERE mo.chief_id = #{chiefId} AND mo.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) GROUP BY DATE(mo.create_time),
+        DAYOFWEEK(DATE(mo.create_time)), CASE DAYOFWEEK(DATE(mo.create_time)) WHEN 1 THEN '周日' WHEN
+        2 THEN '周一' WHEN 3 THEN '周二' WHEN 4 THEN '周三' WHEN 5 THEN '周四' WHEN 6 THEN '周五' WHEN 7 THEN
+        '周六' END ORDER BY DATE(mo.create_time) </select>
 </mapper>

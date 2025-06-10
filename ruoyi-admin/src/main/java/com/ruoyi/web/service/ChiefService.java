@@ -1,6 +1,7 @@
 package com.ruoyi.web.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.pda.domain.DTO.ChiefApplyDTO;
@@ -84,4 +85,12 @@ public interface ChiefService {
     AjaxResult cancel(Long orderId);
 
     List<ChiefAuthVO> getChiefInfo(Long id);
+
+    /**
+     * 获取厨师的绩效数据
+     * @param chiefId 厨师ID
+     * @param timeRange 时间范围：week, month, quarter, year
+     * @return 绩效数据
+     */
+    Map<String, Object> getMyPerformanceData(Long chiefId, String timeRange);
 }

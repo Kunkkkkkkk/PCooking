@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.master;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -269,5 +270,24 @@ public class MasterChiefController extends BaseController {
     public AjaxResult chiefInfo(@PathVariable Long id) {
         List<ChiefAuthVO> list = chiefService.getChiefInfo(id);
         return AjaxResult.success(list);
+    }
+
+    /**
+     * 获取当前厨师的绩效数据
+     */
+    @GetMapping("/chief/performance")
+    public AjaxResult getMyPerformance(@RequestParam(value = "timeRange", defaultValue = "week") String timeRange) {
+        try {
+            Long userId = SecurityUtils.getUserId();
+            ChiefVO chief = chiefService.findChiefByUserId(userId);
+            if (chief == null) {
+                return AjaxResult.error("您还不是厨师，无法查看绩效数据");
+            }
+            
+            Map<String, Object> performanceData = chiefService.getMyPerformanceData(chief.getId(), timeRange);
+            return AjaxResult.success(performanceData);
+        } catch (Exception e) {
+            return AjaxResult.error("获取绩效数据失败: " + e.getMessage());
+        }
     }
 }
