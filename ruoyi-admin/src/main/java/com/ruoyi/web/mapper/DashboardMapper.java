@@ -6,6 +6,11 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+/**
+ * 数据仪表盘数据访问层
+ * 
+ * @author kun
+ */
 @Mapper
 public interface DashboardMapper {
     
@@ -19,7 +24,9 @@ public interface DashboardMapper {
     /**
      * 获取用户统计数据
      */
-    Map<String, Object> getUserStats();
+    Map<String, Object> getUserStats(@Param("timeRange") String timeRange, 
+                                   @Param("startDate") String startDate, 
+                                   @Param("endDate") String endDate);
     
     /**
      * 获取厨师统计数据
@@ -36,7 +43,9 @@ public interface DashboardMapper {
     /**
      * 获取订单状态分布
      */
-    List<Map<String, Object>> getOrderStatusDistribution();
+    List<Map<String, Object>> getOrderStatusDistribution(@Param("timeRange") String timeRange, 
+                                                        @Param("startDate") String startDate, 
+                                                        @Param("endDate") String endDate);
     
     /**
      * 获取热门菜品排行
@@ -53,16 +62,51 @@ public interface DashboardMapper {
                                             @Param("endDate") String endDate);
 
     /**
-     * 获取订单完成情况
+     * 获取用户增长趋势
      */
-    List<Map<String, Object>> getOrderCompletion(@Param("timeRange") String timeRange, 
+    List<Map<String, Object>> getUserGrowth(@Param("timeRange") String timeRange, 
+                                          @Param("startDate") String startDate, 
+                                          @Param("endDate") String endDate);
+
+    /**
+     * 获取营收分析
+     */
+    List<Map<String, Object>> getRevenueAnalysis(@Param("timeRange") String timeRange, 
                                                @Param("startDate") String startDate, 
                                                @Param("endDate") String endDate);
 
     /**
-     * 获取高峰时段分析
+     * 获取厨师申请统计
      */
-    List<Map<String, Object>> getPeakHours(@Param("timeRange") String timeRange, 
-                                         @Param("startDate") String startDate, 
-                                         @Param("endDate") String endDate);
+    List<Map<String, Object>> getChefApplicationStats(@Param("timeRange") String timeRange, 
+                                                     @Param("startDate") String startDate, 
+                                                     @Param("endDate") String endDate);
+
+    /**
+     * 获取订单高峰时段分析
+     */
+    List<Map<String, Object>> getPeakHoursAnalysis(@Param("timeRange") String timeRange, 
+                                                  @Param("startDate") String startDate, 
+                                                  @Param("endDate") String endDate);
+
+    /**
+     * 获取菜品类别分析
+     */
+    List<Map<String, Object>> getDishCategoryAnalysis(@Param("timeRange") String timeRange, 
+                                                     @Param("startDate") String startDate, 
+                                                     @Param("endDate") String endDate);
+
+    /**
+     * 获取用户行为分析
+     */
+    List<Map<String, Object>> getUserBehaviorAnalysis(@Param("timeRange") String timeRange, 
+                                                     @Param("startDate") String startDate, 
+                                                     @Param("endDate") String endDate);
+
+    /**
+     * 获取厨师绩效排行
+     */
+    List<Map<String, Object>> getChefPerformance(@Param("timeRange") String timeRange, 
+                                               @Param("startDate") String startDate, 
+                                               @Param("endDate") String endDate);
 }
