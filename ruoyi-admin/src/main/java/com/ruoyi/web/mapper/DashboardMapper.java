@@ -107,6 +107,6 @@ public interface DashboardMapper {
      * 获取厨师绩效排行
      */
     List<Map<String, Object>> getChefPerformance(@Param("timeRange") String timeRange, 
-                                               @Param("startDate") String startDate, 
-                                               @Param("endDate") String endDate);
+                                         @Param("startDate") String startDate, 
+                                         @Param("endDate") String endDate);
 }
