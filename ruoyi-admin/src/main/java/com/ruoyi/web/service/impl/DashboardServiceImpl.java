@@ -28,29 +28,37 @@ public class DashboardServiceImpl implements DashboardService {
         
         // 获取订单统计
         Map<String, Object> orderStats = dashboardMapper.getOrderStats(timeRange, startDate, endDate);
-        metrics.put("totalOrders", orderStats.get("totalOrders"));
+        
+        // 使用按时间范围过滤的数据作为主要显示
+        metrics.put("totalOrders", orderStats.get("filteredOrders"));
         metrics.put("todayOrders", orderStats.get("todayOrders"));
         metrics.put("orderGrowth", calculateGrowthRate(
             getDoubleValue(orderStats.get("previousOrders")), 
             getDoubleValue(orderStats.get("currentOrders"))));
         
-        // 计算完成率
+        // 添加历史总数作为补充信息
+        metrics.put("allTimeOrders", orderStats.get("allTimeOrders"));
+        
+        // 计算完成率（基于过滤后的数据）
         Long completedOrders = getLongValue(orderStats.get("completedOrders"));
-        Long totalOrders = getLongValue(orderStats.get("totalOrders"));
-        double completionRate = totalOrders > 0 ? (completedOrders * 100.0 / totalOrders) : 0;
+        Long filteredOrders = getLongValue(orderStats.get("filteredOrders"));
+        double completionRate = filteredOrders > 0 ? (completedOrders * 100.0 / filteredOrders) : 0;
         metrics.put("completionRate", completionRate);
         
-        // 获取营收统计
-        metrics.put("totalRevenue", orderStats.get("totalRevenue"));
+        // 获取营收统计（使用按时间范围过滤的数据）
+        metrics.put("totalRevenue", orderStats.get("filteredRevenue"));
         metrics.put("todayRevenue", orderStats.get("todayRevenue"));
         metrics.put("revenueGrowth", calculateGrowthRate(
             getBigDecimalValue(orderStats.get("previousRevenue")), 
             getBigDecimalValue(orderStats.get("currentRevenue"))));
         
-        // 计算平均订单价值
-        BigDecimal totalRevenue = getBigDecimalFromValue(orderStats.get("totalRevenue"));
-        BigDecimal avgOrderValue = totalOrders > 0 ? 
-            totalRevenue.divide(new BigDecimal(totalOrders), 2, BigDecimal.ROUND_HALF_UP) : 
+        // 添加历史总营收作为补充信息
+        metrics.put("allTimeRevenue", orderStats.get("allTimeRevenue"));
+        
+        // 计算平均订单价值（基于过滤后的数据）
+        BigDecimal filteredRevenue = getBigDecimalFromValue(orderStats.get("filteredRevenue"));
+        BigDecimal avgOrderValue = filteredOrders > 0 ? 
+            filteredRevenue.divide(new BigDecimal(filteredOrders), 2, BigDecimal.ROUND_HALF_UP) : 
             BigDecimal.ZERO;
         metrics.put("avgOrderValue", avgOrderValue);
         

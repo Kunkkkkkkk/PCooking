@@ -4,11 +4,27 @@
 
     <!-- 获取订单统计数据 -->
     <select id="getOrderStats" resultType="java.util.Map"> SELECT COUNT(CASE WHEN status != '-2'
-        THEN 1 END) as totalOrders, COUNT(CASE WHEN DATE(create_time) = CURDATE() AND status != '-2'
-        THEN 1 END) as todayOrders, COUNT(CASE WHEN status = '2' THEN 1 END) as completedOrders,
-        COALESCE(SUM(CASE WHEN status != '-2' THEN price ELSE 0 END), 0) as totalRevenue,
-        COALESCE(SUM(CASE WHEN DATE(create_time) = CURDATE() AND status != '-2' THEN price ELSE 0
-        END), 0) as todayRevenue, COUNT(CASE WHEN status != '-2' AND create_time BETWEEN CASE WHEN
+        THEN 1 END) as allTimeOrders, COUNT(CASE WHEN DATE(create_time) = CURDATE() AND status !=
+        '-2' THEN 1 END) as todayOrders, COUNT(CASE WHEN status = '2' THEN 1 END) as
+        completedOrders, COALESCE(SUM(CASE WHEN status != '-2' THEN price ELSE 0 END), 0) as
+        allTimeRevenue, COALESCE(SUM(CASE WHEN DATE(create_time) = CURDATE() AND status != '-2' THEN
+        price ELSE 0 END), 0) as todayRevenue, COUNT(CASE WHEN status != '-2' AND create_time
+        BETWEEN CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
+        WHEN #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} =
+        'month' THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHEN #{timeRange} = 'last7days' THEN
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'last30days' THEN
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week',
+        'month', 'last7days', 'last30days') THEN NOW() ELSE #{endDate} END THEN 1 END) as
+        filteredOrders, COALESCE(SUM(CASE WHEN status != '-2' AND create_time BETWEEN CASE WHEN
+        #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN #{timeRange} =
+        'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month' THEN
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHEN #{timeRange} = 'last7days' THEN
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'last30days' THEN
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week',
+        'month', 'last7days', 'last30days') THEN NOW() ELSE #{endDate} END THEN price ELSE 0 END),
+        0) as filteredRevenue, COUNT(CASE WHEN status != '-2' AND create_time BETWEEN CASE WHEN
         #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN #{timeRange} =
         'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month' THEN
         DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHEN #{timeRange} = 'last7days' THEN
@@ -50,19 +66,19 @@
 
     <!-- 获取用户统计数据 -->
     <select id="getUserStats" resultType="java.util.Map"> SELECT COUNT(*) as totalUsers, COUNT(CASE
-        WHEN DATE(create_time) = CURDATE() THEN 1 END) as newUsers, COUNT(CASE WHEN create_time >=
-        DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as activeUsers, COUNT(CASE WHEN create_time
-        BETWEEN CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00')
-        WHEN #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} =
-        'month' THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHEN #{timeRange} = 'last7days' THEN
-        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'last30days' THEN
-        DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} =
-        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week',
-        'month', 'last7days', 'last30days') THEN NOW() ELSE #{endDate} END THEN 1 END) as
-        currentUsers, COUNT(CASE WHEN create_time BETWEEN CASE WHEN #{timeRange} = 'today' THEN
-        DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 00:00:00') WHEN #{timeRange} =
-        'week' THEN DATE_SUB(CURDATE(), INTERVAL 14 DAY) WHEN #{timeRange} = 'month' THEN
-        DATE_SUB(CURDATE(), INTERVAL 60 DAY) WHEN #{timeRange} = 'last7days' THEN
+        WHEN DATE(create_time) = CURDATE() THEN 1 END) as newUsers, (SELECT COUNT(DISTINCT
+        user_name) FROM sys_logininfor WHERE login_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND
+        status = '0') as activeUsers, COUNT(CASE WHEN create_time BETWEEN CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN #{timeRange} = 'week' THEN
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month' THEN DATE_SUB(CURDATE(),
+        INTERVAL 30 DAY) WHEN #{timeRange} = 'last7days' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        WHEN #{timeRange} = 'last30days' THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate}
+        END AND CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59')
+        WHEN #{timeRange} IN ('week', 'month', 'last7days', 'last30days') THEN NOW() ELSE #{endDate}
+        END THEN 1 END) as currentUsers, COUNT(CASE WHEN create_time BETWEEN CASE WHEN #{timeRange}
+        = 'today' THEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%Y-%m-%d 00:00:00') WHEN
+        #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 14 DAY) WHEN #{timeRange} = 'month'
+        THEN DATE_SUB(CURDATE(), INTERVAL 60 DAY) WHEN #{timeRange} = 'last7days' THEN
         DATE_SUB(CURDATE(), INTERVAL 14 DAY) WHEN #{timeRange} = 'last30days' THEN
         DATE_SUB(CURDATE(), INTERVAL 60 DAY) ELSE DATE_SUB(#{startDate}, INTERVAL 30 DAY) END AND
         CASE WHEN #{timeRange} = 'today' THEN DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY),
@@ -284,27 +300,26 @@
     <!-- 获取厨师绩效排行 -->
     <select id="getChefPerformance" resultType="java.util.Map"> SELECT mc.real_name as name,
         COUNT(mo.order_id) as orderCount, COALESCE(SUM(mo.price), 0) as totalRevenue,
-        COALESCE(AVG(mo.price), 0) as avgOrderValue, ROUND( (COUNT(CASE WHEN mo.status = '2' THEN 1
-        END) * 100.0 / NULLIF(COUNT(CASE WHEN mo.status != '-2' THEN 1 END), 0)), 2 ) as
-        completionRate, ROUND( (COUNT(mo.order_id) * 0.3 + COALESCE(SUM(mo.price), 0) / 1000 * 0.4 +
-        COALESCE(AVG(mo.price), 0) / 100 * 0.3), 2 ) as score FROM master_chief mc LEFT JOIN
-        master_order mo ON mc.chief_id = mo.chief_id WHERE mc.status = '0' <if
-            test="timeRange != null and timeRange == 'today'"> AND (mo.order_id IS NULL OR
-        DATE(mo.create_time) = CURDATE()) </if>
-        <if test="timeRange != null and timeRange == 'week'">
-        AND (mo.order_id IS NULL OR mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) </if>
+        COALESCE(AVG(mo.price), 0) as avgOrderValue, ROUND((COUNT(CASE WHEN mo.status = '2' THEN 1
+        END) * 100.0 / NULLIF(COUNT(CASE WHEN mo.status != '-2' THEN 1 END), 0)), 2) as
+        completionRate, ROUND((COUNT(mo.order_id) * 0.3 + COALESCE(SUM(mo.price), 0) / 1000 * 0.4 +
+        COALESCE(AVG(mo.price), 0) / 100 * 0.3), 2) as score FROM master_chief mc INNER JOIN
+        master_order mo ON mc.chief_id = mo.chief_id WHERE mc.status = '0' AND mo.status != '-2' <if
+            test="timeRange != null and timeRange == 'today'"> AND DATE(mo.create_time) = CURDATE() </if>
         <if
-            test="timeRange != null and timeRange == 'month'"> AND (mo.order_id IS NULL OR
-        mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) </if>
+            test="timeRange != null and timeRange == 'week'"> AND mo.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) </if>
         <if
-            test="timeRange != null and timeRange == 'last7days'"> AND (mo.order_id IS NULL OR
-        mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) </if>
+            test="timeRange != null and timeRange == 'month'"> AND mo.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) </if>
         <if
-            test="timeRange != null and timeRange == 'last30days'"> AND (mo.order_id IS NULL OR
-        mo.create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) </if>
+            test="timeRange != null and timeRange == 'last7days'"> AND mo.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) </if>
         <if
-            test="startDate != null and endDate != null"> AND (mo.order_id IS NULL OR mo.create_time
-        BETWEEN #{startDate} AND #{endDate}) </if> GROUP BY mc.chief_id, mc.real_name ORDER BY score
-        DESC LIMIT 20 </select>
+            test="timeRange != null and timeRange == 'last30days'"> AND mo.create_time >=
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) </if>
+        <if test="startDate != null and endDate != null">
+        AND mo.create_time BETWEEN #{startDate} AND #{endDate} </if> GROUP BY mc.chief_id,
+        mc.real_name HAVING COUNT(mo.order_id) > 0 ORDER BY score DESC LIMIT 20 </select>
 
 </mapper> 
