@@ -5,7 +5,14 @@
     <!-- 获取订单统计数据 -->
     <select id="getOrderStats" resultType="java.util.Map"> SELECT COUNT(CASE WHEN status != '-2'
         THEN 1 END) as allTimeOrders, COUNT(CASE WHEN DATE(create_time) = CURDATE() AND status !=
-        '-2' THEN 1 END) as todayOrders, COUNT(CASE WHEN status = '2' THEN 1 END) as
+        '-2' THEN 1 END) as todayOrders, COUNT(CASE WHEN status = '2' AND create_time BETWEEN CASE
+        WHEN #{timeRange} = 'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 00:00:00') WHEN
+        #{timeRange} = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'month'
+        THEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHEN #{timeRange} = 'last7days' THEN
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY) WHEN #{timeRange} = 'last30days' THEN
+        DATE_SUB(CURDATE(), INTERVAL 30 DAY) ELSE #{startDate} END AND CASE WHEN #{timeRange} =
+        'today' THEN DATE_FORMAT(CURDATE(), '%Y-%m-%d 23:59:59') WHEN #{timeRange} IN ('week',
+        'month', 'last7days', 'last30days') THEN NOW() ELSE #{endDate} END THEN 1 END) as
         completedOrders, COALESCE(SUM(CASE WHEN status != '-2' THEN price ELSE 0 END), 0) as
         allTimeRevenue, COALESCE(SUM(CASE WHEN DATE(create_time) = CURDATE() AND status != '-2' THEN
         price ELSE 0 END), 0) as todayRevenue, COUNT(CASE WHEN status != '-2' AND create_time
