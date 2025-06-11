@@ -3,7 +3,6 @@ package com.ruoyi.pda.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +17,10 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.pda.domain.SocialComment;
 import com.ruoyi.pda.service.ISocialCommentService;
+import com.ruoyi.pda.util.SensitiveWordFilter;
 
 /**
  * 社交评论 控制层
@@ -87,6 +88,17 @@ public class SocialCommentController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody SocialComment socialComment)
     {
+        // 验证评论内容
+        if (StringUtils.isEmpty(socialComment.getContent())) {
+            return error("评论内容不能为空");
+        }
+        
+        // 检测评论内容是否包含敏感词
+        List<String> foundSensitiveWords = SensitiveWordFilter.findSensitiveWords(socialComment.getContent());
+        if (!foundSensitiveWords.isEmpty()) {
+            return error("评论内容包含敏感词汇，请修改后重新提交。发现的敏感词：" + String.join(", ", foundSensitiveWords));
+        }
+        
         // 设置当前登录用户ID
         socialComment.setUserId(SecurityUtils.getUserId());
         return toAjax(socialCommentService.insertSocialComment(socialComment));
@@ -99,6 +111,14 @@ public class SocialCommentController extends BaseController
     @PutMapping
     public AjaxResult edit(@RequestBody SocialComment socialComment)
     {
+        // 如果修改了评论内容，也需要检查敏感词
+        if (StringUtils.isNotEmpty(socialComment.getContent())) {
+            List<String> foundSensitiveWords = SensitiveWordFilter.findSensitiveWords(socialComment.getContent());
+            if (!foundSensitiveWords.isEmpty()) {
+                return error("评论内容包含敏感词汇，请修改后重新提交。发现的敏感词：" + String.join(", ", foundSensitiveWords));
+            }
+        }
+        
         return toAjax(socialCommentService.updateSocialComment(socialComment));
     }
 

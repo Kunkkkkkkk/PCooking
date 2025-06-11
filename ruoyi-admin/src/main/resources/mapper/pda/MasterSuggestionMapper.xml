@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.pda.mapper.MasterSuggestionMapper">
+
+    <resultMap type="MasterSuggestion" id="MasterSuggestionResult">
+        <result property="suggestId" column="suggest_id" />
+        <result property="content" column="content" />
+        <result property="type" column="type" />
+        <result property="userId" column="user_id" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="selectMasterSuggestionVo"> select suggest_id, content, type, user_id, create_time from
+        master_suggestion </sql>
+
+    <select id="selectMasterSuggestionList" parameterType="MasterSuggestion"
+        resultMap="MasterSuggestionResult">
+        <include refid="selectMasterSuggestionVo" />
+        <where>
+            <if test="content != null  and content != ''"> and content like concat('%', #{content},
+        '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if
+                test="userId != null "> and user_id = #{userId}</if>
+        </where> order by
+        create_time desc </select>
+
+    <select id="selectMasterSuggestionBySuggestId" parameterType="Long"
+        resultMap="MasterSuggestionResult">
+        <include refid="selectMasterSuggestionVo" /> where suggest_id = #{suggestId} </select>
+
+    <insert id="insertMasterSuggestion" parameterType="MasterSuggestion" useGeneratedKeys="true"
+        keyProperty="suggestId"> insert into master_suggestion <trim prefix="(" suffix=")"
+            suffixOverrides=",">
+            <if test="content != null and content != ''">content,</if>
+            <if
+                test="type != null and type != ''">type,</if>
+            <if test="userId != null">user_id,</if>
+            <if
+                test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values ("
+            suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">#{content},</if>
+            <if
+                test="type != null and type != ''">#{type},</if>
+            <if test="userId != null">#{userId},</if>
+            <if
+                test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateMasterSuggestion" parameterType="MasterSuggestion"> update master_suggestion <trim
+            prefix="SET" suffixOverrides=",">
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if
+                test="type != null and type != ''">type = #{type},</if>
+            <if test="userId != null">user_id
+        = #{userId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where suggest_id = #{suggestId} </update>
+
+    <delete id="deleteMasterSuggestionBySuggestId" parameterType="Long"> delete from
+        master_suggestion where suggest_id = #{suggestId} </delete>
+
+    <delete id="deleteMasterSuggestionBySuggestIds" parameterType="String"> delete from
+        master_suggestion where suggest_id in <foreach item="suggestId" collection="array" open="("
+            separator="," close=")"> #{suggestId} </foreach>
+    </delete>
+
+</mapper> 
